@@ -299,7 +299,7 @@ Choose based on your comfort level:
 
 ## 📚 Prompt Library
 
-All prompts below are ready to copy-paste. Store them in `.claude/prompts/` for quick access.
+All prompts below are ready to copy-paste. Store them in `Prompt Catalog.md` for quick access.
 
 ---
 
