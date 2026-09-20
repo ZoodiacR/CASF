@@ -1,6 +1,6 @@
 # 🤖 CASF — Claude Autonomous Software Framework
 
-> A modular, agent-based framework that turns Claude Code (or any capable AI coding agent) into a coordinated team of 10 senior engineers working on your project autonomously — with checkpoints, memory, and quality gates.
+> A modular, agent-based framework that turns Claude Code (or any capable AI coding agent) into a coordinated team of 12 senior engineers working on your project autonomously — with checkpoints, memory, and quality gates.
 
 ---
 
@@ -35,9 +35,10 @@ Think of it as **"Rails for AI-assisted development"**: convention over configur
 - 🧠 **12 specialized agents** (orchestrator, context manager, cost accountant, architects, security, QA, DevOps, etc.)
 - ⚡ **7 slash commands** (`/start-project`, `/new-sprint`, `/review`, `/ship`, `/recover`, `/resume`, `/status`)
 - 🔄 **4 orchestrated workflows** (sprint, quality gate, release, emergency recovery)
-- 📚 **5 reusable templates** (ADR, sprint plan, PR, post-mortem, spec)
+- 📚 **6 reusable templates** (ADR, sprint plan, PR, post-mortem, spec)
 - 💾 **Persistent memory** (progress checkpoint, decisions, lessons learned, tech debt, token ledger)
-- 🎛️ **3 execution modes** (fully autonomous, checkpoints, manual)
+- 🐳 **Docker** (framework + generated apps + CASF Studio, all containerized)
+- 🖥️ **CASF Studio** (the web UI: prompt → rich spec → materialized app, with live preview + cost accounting)
 
 ---
 
@@ -72,7 +73,7 @@ Working with AI coding assistants at scale exposes recurring pain points:
 ### 1. Separation of "how" vs "what"
 
 - **`CLAUDE.md`** = the *how* → rules, principles, engineering standards (project-specific but based on a reusable template)
-- **`project_spec.md`** = the *what* → what we're building, always project-specific
+- **`project.md`** (in CASF Studio) / **`project_spec.md`** (classic) = the *what* → what we're building, always project-specific. The spec is a human-readable Markdown artifact that both the human and the framework can read and edit.
 
 ### 2. Agents as personas, not as processes
 
@@ -80,10 +81,12 @@ Each agent is a **Markdown definition** of a role, its triggers, inputs, outputs
 
 ### 3. Memory as first-class citizen
 
-`.claude/memory/` holds three append-only files:
+`.claude/memory/` holds five persistent files:
+- `progress.md` → **live checkpoint** (single source of truth for resume)
 - `decisions.md` → every non-trivial choice with rationale
 - `lessons_learned.md` → what worked, what didn't
 - `tech_debt.md` → tracked debt with severity and plan
+- `token_ledger.md` → token consumption and cost ledger
 
 The AI reads these at the start of every session, so knowledge compounds.
 
@@ -170,13 +173,18 @@ your-project/
 │   ├── prompts/                     # Ready-to-use prompt library
 │   │   └── README.md
 │   ├── memory/                      # Persistent context
+│   │   ├── progress.md              # live checkpoint (resume)
 │   │   ├── decisions.md
 │   │   ├── lessons_learned.md
-│   │   └── tech_debt.md
+│   │   ├── tech_debt.md
+│   │   └── token_ledger.md
 │   └── logs/                        # Session logs (optional)
 ├── sprints/                         # Sprint plans (created as you go)
 ├── docs/
-│   └── adr/                         # Architecture Decision Records
+│   ├── adr/                         # Architecture Decision Records
+│   └── sprint/                      # Sprint plans (sprint_1_plan.md, …)
+├── PATRON_DE_DISENO.md              # Design pattern / architecture blueprint
+├── VENTAJAS_COMPETITIVAS.md         # Business & competitive-advantage doc
 └── post-mortems/                    # Incident reports
 ```
 
@@ -264,6 +272,43 @@ Trigger these by asking the AI to "execute /command-name". Each command is a def
 | **quality_gate** | Before merge/deploy | Automated + manual checks pass |
 | **release_workflow** | On `/ship` | Version bump → tag → deploy → smoke test |
 | **emergency_recovery** | Incident detected | Contain → rollback → post-mortem |
+
+---
+
+## 🖥️ CASF Studio (the web product)
+
+CASF Studio is the companion web app that turns the framework into a product: a chat interface where the user writes a prompt, the LLM converts it into a rich `ProjectSpec` (`project.md`), and the **materializer** turns that spec into a working app — with live preview, cost accounting, and a sprint workflow all visible in the UI.
+
+```
+prompt → [LLM] → project.md (rich spec)
+            │
+            ▼
+   design decisions (interactive or hands-free)
+            │
+            ▼
+   materializer → full app (CRUD + backend + auth + i18n + Docker)
+            │
+            ▼
+   live preview iframe + token/cost dashboard + memory
+```
+
+Key Studio features:
+- **Rich specs from brief prompts** (enrichment pass guarantees commercial quality)
+- **Interactive design decisions** (currency/theme/language/auth) or **hands-free** mode
+- **Editable spec** — the `project.md` can be adjusted by natural-language feedback *or* edited directly
+- **Token & cost accounting** per LLM, with admin/user role visibility
+- **Persistent memory** (`memory.md` + `state.json`) with a "resume" button
+- **Docs tab** that renders the framework's own artifacts (progress, sprints, blueprint) live
+
+## 🐳 Docker
+
+Everything ships containerized:
+
+| Target | Dockerfile | Notes |
+|---|---|---|
+| **CASF framework** | `Dockerfile` | Packages `.claude/` + `CLAUDE.md` as a mountable volume |
+| **CASF Studio** | `backend/Dockerfile` + `frontend/Dockerfile` + `docker-compose.yml` | nginx proxies `/api` → backend |
+| **Generated apps** | auto-generated in `materializer.ts` | full-stack → Node+Postgres; static → nginx |
 
 ---
 

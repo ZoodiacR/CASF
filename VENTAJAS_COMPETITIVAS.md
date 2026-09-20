@@ -52,16 +52,67 @@ La tesis central: **el valor no está en "escribir código", sino en el sistema 
 5. **Agnóstico al modelo.** No dependes de un vendor; puedes usar el LLM más barato o uno local.
 6. **Self-host / on-prem posible.** Al ser archivos + una API, se puede vender como producto privado, lo que abre el mercado enterprise.
 
+### 3.1 El foso real: CASF cubre el BUCLE COMPLETO, no solo el stack
+
+> El error de los competidores es creer que el valor está en "generar una app". El valor está en **gobernar el proceso de convertir una idea en un producto comercializable, de forma auditable, reanudable y controlable**. Eso es lo que hace CASF, y por eso un competidor nuevo no puede alcanzarlo solo "saliendo con otro generador".
+
+El bucle completo que CASF cubre (y que la competencia deja a medias):
+
+| Fase del bucle | Qué hace CASF | Competidores típicos |
+|---|---|---|
+| **Idea → Spec rico** | Un prompt breve (3 palabras) se expande a un spec completo: entidades, páginas, features, stack. **Enriquecimiento garantizado**, no mockup genérico | Generan solo lo literal del prompt |
+| **Decisiones de diseño** | Modo **interactivo** (el framework pregunta moneda/tema/idioma/login y el usuario decide) o **manos libres** (decide solo). El usuario **controla el proceso** | Caja negra: no preguntan, no dejan decidir |
+| **Materialización comercial** | App funcional con CRUD + backend (Express + JWT + schema.sql) + auth + formato de moneda + tema + i18n. **Lista para vender**, no prototipo | Mockups estáticos sin backend |
+| **Memoria visible** | El progreso se registra y se **ve dentro de la propia web** (`memory.md` + timeline en vivo) y se puede **retomar** donde quedó | Se pierde al cerrar la pestaña |
+| **Contabilidad + margen** | Tokens y costo por cualquier LLM, con margen interno y rol admin/usuario | Costo opaco o inexistente |
+| **Seguridad por diseño** | Los secretos (API keys) **nunca** se piden en el chat ni se suben a repos: se leen de `.env` local ignorado por git | Exponen claves en el prompt/repo |
+
+**Por qué esto es un foso (moat) y no una feature:**
+
+1. **Efecto de red de proceso.** Cuanto más se usa, más memoria acumula (decisiones, lecciones, deuda), y el framework se vuelve *mejor con el uso* para el cliente. Un competidor nuevo empieza vacío.
+2. **Los competidores compiten en el 20% visible (generar UI); CASF domina el 80% invisible (gobernanza, memoria, costos, secretos, reanudación).** Esa parte invisible es la que genera confianza empresarial y retención.
+3. **La especificación es propiedad del cliente.** El `ProjectSpec` + `memory.md` son archivos versionables que el cliente se lleva. Eso crea **lock-in positivo** (no por encierro, sino por valor acumulado).
+4. **Multi-modelo + self-host = imbatible en precio.** Al poder correr con modelos locales/baratos (margen ≈ $0), CASF puede ofrecer precios que un competidor atado a un LLM premium no puede sostener.
+
 ---
 
 ## 4. Modelos de monetización
 
-1. **SaaS por suscripción** — freemium: N generaciones gratis/mes, luego planes por créditos o por uso.
-2. **Pago por resultado (pay-per-app)** — cobrar por "build" materializado, con margen sobre el costo real del LLM.
-3. **Créditos de cómputo con recargo** — vender tokens con markup transparente (la contabilidad de costos lo habilita).
-4. **Licencia on-prem / self-hosted** — para empresas que no quieren enviar su código a terceros (gran ventaja frente a v0/Lovable).
-5. **Marketplace de agentes/templates** — vender "blueprints" verticales (e-commerce, SaaS, dashboards) que CASF materializa.
-6. **Servicios/consultoría** — CASF como acelerador interno para agencias: menos horas por proyecto.
+### Modelo elegido (principal): Suscripción + margen interno
+
+**Flujo de dinero:**
+```
+Usuario paga suscripción fija (plan mensual/anual)
+        │
+        ▼
+CASF Studio paga las APIs de los modelos (DeepSeek, Claude, OpenAI…)
+        │
+        ▼
+Comisión interna (30%+ por arriba) se descuenta internamente
+        │
+        ▼
+El usuario NO ve el costo real de tokens — ve "incluido en tu plan"
+```
+
+**Reglas del modelo:**
+1. El usuario paga **una cuota fija** por el plan (no paga por token ni ve el gasto real).
+2. Ese dinero **financia las suscripciones/APIs de los modelos**.
+3. La **comisión (30% o más) se maneja interna**, "por arriba", sobre el costo real.
+4. La UI del usuario muestra **abstracción** (tokens usados / "cubierto por tu plan"), **nunca el costo en $ real**.
+5. El **costo real + margen** se trackea internamente (ledger + endpoint admin) para que el dueño audite rentabilidad.
+
+**En el código (implementado):**
+- `backend/src/cost.ts` → `costOf()` calcula el costo real del proveedor; `applyMargin()` aplica el margen interno.
+- `backend/src/ledger.ts` → guarda el costo real de cada llamada (interno, no expuesto al usuario).
+- Endpoint interno `/api/admin/cost` → costo real + margen para el dueño.
+- Endpoint público `/api/cost` → solo tokens/uso (sin $), para el dashboard del usuario.
+
+### Modelos complementarios (a futuro)
+
+1. **Pago por resultado (pay-per-app)** — cobrar por "build" materializado.
+2. **Licencia on-prem / self-hosted** — para empresas que no quieren enviar su código a terceros.
+3. **Marketplace de agentes/templates** — vender "blueprints" verticales.
+4. **Servicios/consultoría** — CASF como acelerador interno para agencias.
 
 **Margen clave:** CASF puede correr con `mock`/modelos baratos o locales en el arranque (costo marginal ≈ $0), lo que permite un **freemium rentable**.
 

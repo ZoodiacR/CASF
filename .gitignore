@@ -1,0 +1,13 @@
+# --- Secrets / environment ---
+.env
+.env.*
+!.env.example
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Agent session data ---
+.claude/logs/*
+!.claude/logs/.gitkeep

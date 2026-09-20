@@ -56,6 +56,34 @@ Each lesson entry should include:
 - **Context:** Building the provider-agnostic LLM layer for CASF Studio.
 - **Action:** Always ship a mock/fake provider alongside real ones; run smoke tests against it before touching paid APIs.
 
+### LL-007: A resume file only works if it's updated *during* work, not after
+- **Date:** 2026-09-20
+- **Lesson:** Creating `progress.md` + `context_manager` + `/resume` is necessary but not sufficient. The first "resume" test revealed the checkpoint was stale (mentioned an old task and a wrong commit hash) and the token ledger was empty — because nobody updated them incrementally, only once at the end.
+- **Category:** Process
+- **Context:** Verifying the memory/resume mechanism after building it.
+- **Action:** `progress.md` must be rewritten at the START and END of every working turn (not per project). `token_ledger.md` must be appended on every generation. The resume file is only as good as its last honest update; a stale checkpoint is worse than none because it sends the next session down the wrong path.
+
+### LL-008: Editar el spec crudo (project.md) es tan valioso como el feedback por prompt
+- **Date:** 2026-09-20
+- **Lesson:** El feedback por lenguaje natural es cómodo, pero el usuario también quiere **editar el markdown directamente** ("a su antojo"). Exponer el artefacto crudo + re-parsearlo da control fino y transparencia total (ambos pueden leer el `project.md`).
+- **Category:** Communication
+- **Context:** El usuario pidió que los cambios del spec "también estén en la documentación" para editarlo manualmente.
+- **Action:** Toda herramienta que genere artefactos legibles (spec, config) debe permitir **dos vías de edición**: (1) comandos/prompts y (2) edición directa del artefacto con re-parseo. Nunca esconder el markdown detrás de la UI.
+
+### LL-009: Generar código dentro de template literals exige escapar `\n` y `/`
+- **Date:** 2026-09-20
+- **Lesson:** El materializador inyecta un `app.js` completo dentro de un template literal de TypeScript. Escapes como `\n` (join) o `/` (regex) rompen el JS generado si no se duplican (`\\n`, `\\/`). Los errores aparecen como `SyntaxError` en el **archivo generado**, no en el fuente, lo que despista.
+- **Category:** Technical
+- **Context:** Bugs de `app.js` generado al añadir el check-in QR y los mensajes del bot.
+- **Action:** Al escribir generadores de código, tratar el template literal como "código fuente embebido": revisar escapes de backslash y regex, y testear el **output** generado (no solo compilar el generador). Cache-busting (`?v=`) en el preview ayuda a no servir versiones viejas.
+
+### LL-010: Docker "por defecto" baja la fricción de despliegue a cero
+- **Date:** 2026-09-20
+- **Lesson:** Añadir `Dockerfile` + `docker-compose.yml` a **toda** app generada (y a Studio y al framework) hace que "funciona en mi máquina" deje de ser un problema: un solo `docker compose up` levanta el stack completo.
+- **Category:** Architecture
+- **Context:** El usuario pidió Docker en todo lo generado por su utilidad.
+- **Action:** Incluir artefactos Docker en la salida del materializador por defecto, con variantes según stack (full-stack → Node+Postgres; static → nginx). Documentar el comando en el README generado.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

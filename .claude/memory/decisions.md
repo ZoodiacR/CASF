@@ -52,6 +52,46 @@ Each decision entry should include:
 - **Rationale:** No `gh` CLI or token was available in this environment; a documented PAT flow is the most automated path the user can run themselves.
 - **Impact:** `.cursor/mcp.json`, `GITHUB_GUIDE.md`.
 
+### 2026-09-20: Authentication = local JWT + bcrypt + SQLite (open registration)
+- **Decision:** CASF Studio auth is local: JWT (access token) + bcrypt password hashing, persisted in SQLite (`better-sqlite3`). Registration is open (anyone can sign up as a normal user); admin is assigned manually in the DB.
+- **Category:** Architecture
+- **Rationale:** Self-contained (no external identity provider needed for the MVP), transparent for a future SaaS migration (JWT is portable), and the SQLite file keeps the backend dependency-free. `bcryptjs` + `better-sqlite3` both ship prebuilt binaries, so no native compile on Windows.
+- **Impact:** New `backend/src/db.ts` + `backend/src/auth.ts`, `requireAuth`/`requireAdmin` middleware, `/api/auth/*` routes; replaces the temporary `X-Role` header placeholder in `isAdmin`; frontend login screen + token persistence.
+- **Note:** This supersedes the temporary role placeholder. The **first user** is a normal user (not admin) — admin must be granted by flipping `role` in the `users` table.
+
+### 2026-09-20: QR = check-in automático (fidelidad), no solo identificación
+- **Decision:** El QR de fidelidad (del negocio y de cada cliente) codifica una URL `#checkin[/id]`. Al escanearlo: se registra la llegada, se suman puntos automáticamente y se guarda al cliente en la BD. La vista `#checkin` es SOLO la vista del cliente; el dueño gestiona todo desde el panel SaaS (CRUD).
+- **Category:** Product
+- **Rationale:** El usuario aclaró que la idea es "automatizar la fidelidad y las llegadas": el QR es el mecanismo de check-in, no un simple código decorativo. Separa la experiencia del cliente (escanear y listo) de la gestión del dueño (dashboard + CRUD).
+- **Impact:** `materializer.ts` (funciones `checkinUrl`, `doCheckin`, `renderCheckin*`, detección `#checkin` en `boot` + `hashchange`), KPI "visitas hoy".
+
+### 2026-09-20: Feedback complejo en specs (enriquecimiento iterativo)
+- **Decision:** El bucle de feedback (`/api/spec/feedback` + `applyFeedback`) no solo ajusta tema/idioma/moneda/login, sino que **entiende peticiones ricas**: "agrega un dashboard del dueño para ver qué hacen los barberos" → añade entidad `Employee`, página `/owner`, features concretas y fuerza backend.
+- **Category:** Product
+- **Rationale:** El usuario quiere poder pedir mejoras en lenguaje natural en cada build ("un par de prompts efectivos se ajuste para que quede a full"). El enriquecimiento determinista replica lo que haría un LLM fuerte.
+- **Impact:** `spec.ts` (`applyFeedback` con detección `wantsOwner`/`wantsBotLog`), `materializer.ts` (`renderOwnerSection`, `seedStaff`, `logBot`), `index.ts` (endpoint `/api/spec/feedback`), `App.tsx` (cuadro de feedback).
+
+### 2026-09-20: Docker en apps generadas + CASF Studio + framework
+- **Decision:** Toda app generada incluye `Dockerfile` + `docker-compose.yml` + `.dockerignore`. Full-stack → imagen Node + Postgres; static → nginx. CASF Studio tiene compose (backend+frontend con proxy nginx `/api`). El framework CASF tiene `Dockerfile` (volumen montable en cualquier host agente).
+- **Category:** Infrastructure
+- **Rationale:** Despliegue con un solo comando (`docker compose up`), portabilidad, y consistencia con el cap. 16 (DevOps) de la constitución. El usuario lo pidió explícitamente por su utilidad.
+- **Impact:** `materializer.ts` (`dockerfile`, `dockerCompose`, `dockerignore`), `casf-studio/{backend,frontend}/Dockerfile`, `casf-studio/docker-compose.yml`, `CASF/Dockerfile`.
+
+### 2026-09-20: Edición directa del `project.md` por el usuario
+- **Decision:** Además del feedback por lenguaje natural, el usuario puede **editar el `project.md` crudo a su antojo** desde CASF Studio: botón "Editar spec" → textarea con el markdown → "Guardar" → el backend re-parsea (`/api/spec/parse` + `parseProjectMd`) y regenera el spec normalizado. Cualquier ajuste queda reflejado en memoria.
+- **Category:** Product
+- **Rationale:** El usuario quiere control total: "lo que te digo que actualizar también debe estar en la documentación para que el usuario edite el spec a su antojo". El feedback por prompt es cómodo, pero editar el markdown directamente es la vía de control fino y transparente (ambos pueden leer el `project.md`).
+- **Impact:** `backend/src/index.ts` (`POST /api/spec/parse`), `frontend/src/api.ts` (`parseSpec`), `frontend/src/App.tsx` (estado `editingSpec`/`specDraft` + botones "Editar"/"Guardar"/"Cancelar"), `i18n.ts` (claves), `styles.css` (`.spec-editor`).
+
 ---
+
+### 2026-09-20: Pestaña Docs/Sprints en CASF Studio (transparencia del framework)
+- **Decision:** CASF Studio expone un endpoint `/api/docs` + pestaña "Docs" que lee en vivo los artefactos del framework (`progress.md`, `decisions.md`, `lessons_learned.md`, `tech_debt.md`, `token_ledger.md`, sprints, patrón de diseño, ventajas) desde la carpeta del framework.
+- **Category:** Product
+- **Rationale:** El usuario quiere ver "todo el proceso, documentación y planificación de sprints" dentro de Studio para tener control y visibilidad del framework trabajando.
+- **Impact:** `backend/src/docs.ts` (nuevo), `index.ts` (`/api/docs`), `frontend/src/Docs.tsx` (nuevo), `api.ts`, `App.tsx`, `i18n.ts`.
+
+---
+
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
