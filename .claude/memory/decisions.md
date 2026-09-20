@@ -22,7 +22,35 @@ Each decision entry should include:
 
 ## Project Decisions
 
-*Project-specific decisions will be recorded here as the project progresses.*
+### 2026-09-20: Adopt monorepo for CASF Studio
+- **Decision:** CASF Studio (the idea-to-app web product) uses a monorepo: `backend/` (Node + Express + TypeScript) and `frontend/` (React + Vite + TypeScript).
+- **Category:** Architecture
+- **Rationale:** Clear separation of concerns (API + LLM layer vs. UI), easy to reason about and deploy independently, matches the user's explicit "front y backend separados" requirement.
+- **Impact:** `casf-studio/` repository structure; future deployment can host each side independently.
+
+### 2026-09-20: ProjectSpec as Markdown (`project.md`), not JSON
+- **Decision:** The spec artifact the LLM produces is a human-readable `project.md` (Markdown), not JSON. The framework parses it internally to materialize code.
+- **Category:** Product
+- **Rationale:** The user wants the spec to be readable by both the human and the framework. Markdown is legible, versionable, and reviewable; JSON is not.
+- **Impact:** `backend/src/spec.ts` parses Markdown via `parseProjectMd`; the generated app stores `project.md` alongside code.
+
+### 2026-09-20: Provider-agnostic LLM layer with zero-cost `mock`
+- **Decision:** All LLM access goes through an `LLMProvider` interface; `mock` (deterministic, $0) is the default so the flow works without API keys. OpenAI/Anthropic supported via env vars.
+- **Category:** Architecture
+- **Rationale:** Enables demo/testing with no spend, avoids vendor lock-in, and feeds the token/cost accounting (`cost_accountant`).
+- **Impact:** `backend/src/llm.ts`, `backend/src/cost.ts`; new providers are added as one class.
+
+### 2026-09-20: Add `context_manager` + `cost_accountant` agents
+- **Decision:** Two new framework agents: `context_manager` (owns `progress.md`, enables resume after token exhaustion) and `cost_accountant` (tracks tokens/cost for any LLM).
+- **Category:** Process
+- **Rationale:** Direct response to the user's pain: losing the thread after running out of tokens, and needing transparent cost accounting for monetization.
+- **Impact:** `.claude/agents/`, `CLAUDE.md` delegation hierarchy, `/resume` command, `progress.md`, `token_ledger.md`.
+
+### 2026-09-20: GitHub publishing via PAT (manual, guide provided)
+- **Decision:** Repos (`casf-studio`, `casf` v1.0) are published to GitHub as PRIVATE, via a Personal Access Token. The MCP server config is in `.cursor/mcp.json`; full instructions in `GITHUB_GUIDE.md`.
+- **Category:** Infrastructure
+- **Rationale:** No `gh` CLI or token was available in this environment; a documented PAT flow is the most automated path the user can run themselves.
+- **Impact:** `.cursor/mcp.json`, `GITHUB_GUIDE.md`.
 
 ---
 

@@ -35,7 +35,26 @@ Each lesson entry should include:
 
 ## Project-Specific Lessons
 
-*Project-specific lessons will be recorded here as the project progresses.*
+### LL-004: Token exhaustion loses the thread — checkpoint incrementally
+- **Date:** 2026-09-20
+- **Lesson:** A long autonomous session that runs out of tokens/context loses all in-flight state, and the user cannot easily resume. Waiting until the end to write a summary is insufficient — by then the state is already gone.
+- **Category:** Process
+- **Context:** First real use of CASF to build CASF Studio; the user explicitly reported losing the thread after token exhaustion.
+- **Action:** `context_manager` must update `progress.md` BEFORE starting and AFTER finishing every task (or every 5 actions). The `progress.md` file is the single source of truth for resume. Enforce `/resume` as the canonical way to pick up work.
+
+### LL-005: A human-readable spec beats JSON for reviewability
+- **Date:** 2026-09-20
+- **Lesson:** Representing the project spec as Markdown (`project.md`) — even though the engine needs structured data internally — massively improves the human's ability to review and trust the generated output. JSON is machine-friendly but not human-friendly.
+- **Category:** Communication
+- **Context:** User requested the spec be "understandable by us two" (human + framework), not JSON.
+- **Action:** Prefer Markdown for any artifact that a human must read or sign off. Parse/derive structure programmatically as needed.
+
+### LL-006: A zero-cost deterministic provider unlocks testing
+- **Date:** 2026-09-20
+- **Lesson:** A `mock` LLM provider (deterministic, $0) makes the entire pipeline testable and demoable without API keys, and catches integration bugs (e.g. name derivation from the wrong input) early.
+- **Category:** Technical
+- **Context:** Building the provider-agnostic LLM layer for CASF Studio.
+- **Action:** Always ship a mock/fake provider alongside real ones; run smoke tests against it before touching paid APIs.
 
 ---
 

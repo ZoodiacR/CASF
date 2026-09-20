@@ -312,6 +312,8 @@ Use this **every time** you return to a project after closing Claude Code:
 
 This is arguably the **most important prompt** in the catalog — the one you'll use most often over the lifetime of a project.
 
+> ⚡ **Shortcut:** CASF v1.0 ships a `/resume` slash command that does exactly this (reads `progress.md` + memory + git, then reports "where we are" + next 3 actions). You can simply type `/resume` instead of pasting the full prompt below. The prompt remains here for agents that don't support slash commands.
+
 #### ⚙️ How it behaves
 
 - Reads the framework as usual.
@@ -367,6 +369,16 @@ Reply `✅` to continue, or redirect with something like *"Let's skip to action 
 ---
 
 ## 💡 Tips & Best Practices
+
+### Use `/resume` + `progress.md` to never lose the thread
+
+CASF v1.0 adds a **live checkpoint** (`.claude/memory/progress.md`) updated by the `context_manager` agent. To resume after token exhaustion or a closed session:
+
+```
+/resume
+```
+
+…or paste the Version D prompt. The framework also tracks **tokens and cost** (`.claude/memory/token_ledger.md`, maintained by `cost_accountant`), so you always know the budget consumed.
 
 ### Choose the right prompt
 
