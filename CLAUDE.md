@@ -162,10 +162,12 @@ This chapter defines the standard lifecycle that all projects follow within the 
 This chapter defines how to maintain coherence across long sessions, when to summarize context, and how to use the `.claude/memory/` directory effectively.
 
 ### Rules
-1. **Memory Structure:** The `.claude/memory/` directory contains three canonical files:
-   - `decisions.md`: Append-only log of architectural and product decisions
-   - `lessons_learned.md`: Knowledge base of what worked and what didn't
-   - `tech_debt.md`: Tracked technical debt with owner, severity, and remediation plan
+1. **Memory Structure:** The `.claude/memory/` directory contains four canonical files:
+ - `progress.md`: **Live checkpoint** (current stage, in-progress work, next actions, blockers, budget). The single source of truth for resuming. Owned by `context_manager`.
+ - `decisions.md`: Append-only log of architectural and product decisions
+ - `lessons_learned.md`: Knowledge base of what worked and what didn't
+ - `tech_debt.md`: Tracked technical debt with owner, severity, and remediation plan
+ - `token_ledger.md`: Token consumption and cost ledger. Owned by `cost_accountant`.
 
 2. **Summarization Triggers:** Create a session summary when:
    - Context exceeds 10,000 tokens
@@ -186,6 +188,8 @@ This chapter defines how to maintain coherence across long sessions, when to sum
    - Files currently being modified
 
 5. **Historical Context:** Reference `.claude/memory/` files rather than repeating historical context. "As documented in decisions.md ADR-003..."
+
+6. **Incremental Checkpointing (mandatory):** `context_manager` updates `.claude/memory/progress.md` BEFORE starting and AFTER finishing every task (or every 5 autonomous actions, whichever comes first). On any context-window/token-exhaustion warning, checkpoint immediately. This guarantees the work can always be resumed without re-explaining.
 
 ### Examples
 **Good:**
@@ -301,6 +305,8 @@ This chapter defines the delegation matrix — which agent delegates to whom, wh
 1. **Delegation Hierarchy:**
    ```
    project_orchestrator (entry point)
+   ├── context_manager (session continuity, progress.md)
+   ├── cost_accountant (token/cost tracking)
    ├── chief_engineer (architecture authority)
    │   ├── backend_architect
    │   ├── frontend_architect
@@ -1413,6 +1419,8 @@ This chapter defines how the framework and team processes improve over time.
 
 ### Agent Responsibilities
 - **project_orchestrator:** Coordination, delegation, progress tracking
+- **context_manager:** Session continuity, `progress.md` checkpointing, resume
+- **cost_accountant:** Token/cost tracking, budget warnings, ledger
 - **chief_engineer:** Architecture, technical decisions, ADR approval
 - **backend_architect:** API design, services, data flow
 - **frontend_architect:** UI architecture, components, state management
