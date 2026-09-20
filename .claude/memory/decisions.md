@@ -77,6 +77,18 @@ Each decision entry should include:
 - **Rationale:** Despliegue con un solo comando (`docker compose up`), portabilidad, y consistencia con el cap. 16 (DevOps) de la constitución. El usuario lo pidió explícitamente por su utilidad.
 - **Impact:** `materializer.ts` (`dockerfile`, `dockerCompose`, `dockerignore`), `casf-studio/{backend,frontend}/Dockerfile`, `casf-studio/docker-compose.yml`, `CASF/Dockerfile`.
 
+### 2026-09-20: Moneda restringida a USD/PEN (switch dólares ↔ soles)
+- **Decision:** El selector de moneda (pregunta de diseño interactiva) ofrece solo **USD** y **PEN** (soles), como switch binario, en lugar de las 7 monedas anteriores. El símbolo del sol es `S/`. El mapeo de feedback por lenguaje natural ya reconoce "dólares"/"soles"/"pen".
+- **Category:** Product
+- **Rationale:** El usuario está en Perú y solo maneja dólares y soles; el resto de monedas (EUR/MXN/ARS/COP/CLP) añadían ruido sin uso.
+- **Impact:** `backend/src/spec.ts` (`proposeQuestions` → options `["USD","PEN"]`, label "¿Dólares o soles?"). El materializador ya formatea `PEN` → `S/`.
+
+### 2026-09-20: Dominios verticales (fidelidad/citas/booking) son full-stack por defecto
+- **Decision:** `isAmbitious()` en `llm.ts` ahora marca como full-stack (React + Node/Express + PostgreSQL) los dominios de fidelidad/QR/puntos/recompensas, citas/reservas/agenda, y verticales de servicios (peluquería/barbería/spa/gym/clínica). Antes, "app de fidelidad con QR, citas y puntos" generaba un stack **estático** (localStorage) a pesar de pedir "autenticación" y "panel de administración".
+- **Category:** Architecture
+- **Rationale:** Una app de fidelidad con citas y puntos es inherentemente multi-usuario con CRUD persistente; generar un mockup estático era un bug detectado en la prueba de fuego.
+- **Impact:** `backend/src/llm.ts` (`isAmbitious`), prueba de fuego ahora produce 7 páginas + 14 features + stack full-stack.
+
 ### 2026-09-20: Edición directa del `project.md` por el usuario
 - **Decision:** Además del feedback por lenguaje natural, el usuario puede **editar el `project.md` crudo a su antojo** desde CASF Studio: botón "Editar spec" → textarea con el markdown → "Guardar" → el backend re-parsea (`/api/spec/parse` + `parseProjectMd`) y regenera el spec normalizado. Cualquier ajuste queda reflejado en memoria.
 - **Category:** Product
