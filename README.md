@@ -32,11 +32,11 @@ Think of it as **"Rails for AI-assisted development"**: convention over configur
 
 ### At a Glance
 
-- 🧠 **10 specialized agents** (orchestrator, architects, security, QA, DevOps, etc.)
-- ⚡ **6 slash commands** (`/start-project`, `/new-sprint`, `/review`, `/ship`, `/recover`, `/status`)
+- 🧠 **12 specialized agents** (orchestrator, context manager, cost accountant, architects, security, QA, DevOps, etc.)
+- ⚡ **7 slash commands** (`/start-project`, `/new-sprint`, `/review`, `/ship`, `/recover`, `/resume`, `/status`)
 - 🔄 **4 orchestrated workflows** (sprint, quality gate, release, emergency recovery)
 - 📚 **5 reusable templates** (ADR, sprint plan, PR, post-mortem, spec)
-- 💾 **Persistent memory** (decisions, lessons learned, tech debt)
+- 💾 **Persistent memory** (progress checkpoint, decisions, lessons learned, tech debt, token ledger)
 - 🎛️ **3 execution modes** (fully autonomous, checkpoints, manual)
 
 ---
@@ -221,11 +221,13 @@ Now you're ready to build. 🚀
 
 ---
 
-## 👥 The 10 Agents
+## 👥 The 12 Agents
 
 | Agent | Role | Enforces |
 |---|---|---|
 | **project_orchestrator** | Top-level coordinator, entry point, delegates work | Everything |
+| **context_manager** | Session continuity, live progress checkpoint, resume | Context Management (Ch. 5) |
+| **cost_accountant** | Token & cost tracking, budget alerts, ledger | Cost/observability |
 | **chief_engineer** | Senior tech lead, resolves conflicts, signs ADRs | Architecture standards |
 | **backend_architect** | APIs, services, data flow, background jobs | Backend rules (Ch. 10) |
 | **frontend_architect** | UI architecture, components, state, a11y | Frontend rules (Ch. 11) |
@@ -249,6 +251,7 @@ Trigger these by asking the AI to "execute /command-name". Each command is a def
 | `/review` | Full code + architecture review of a changeset |
 | `/ship` | Runs quality gates and releases to target environment |
 | `/recover` | Emergency incident response (triage → contain → rollback → post-mortem) |
+| `/resume` | Resume a project exactly where it left off (reads progress.md) |
 | `/status` | Prints project dashboard: sprint, blockers, debt, decisions |
 
 ---
