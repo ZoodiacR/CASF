@@ -7,10 +7,11 @@
 - **Lifecycle stage:** Ship (cierre de Sprint 1)
 - **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
 - **Working branch:** main
-- **Last commit:** feat(llm): 5 nuevos dominios verticales + pulido del flujo
-- **Overall status:** 🟢 sprint completado + pulido del flujo + 5 verticales nuevos (e-commerce, restaurante, salud, educación, RRHH)
+- **Last commit:** fix(security): eliminar secretos hardcodeados (GitGuardian)
+- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening de seguridad (GitGuardian)
 
 ## ✅ Completed (most recent first)
+- [x] **Hardening de secretos (GitGuardian)**: eliminados 4 secretos hardcodeados (`***REMOVED***`, `JWT_SECRET` fijos en `auth.ts`, `seed-admin.ts` y el runtime generado). Ahora: secreto JWT aleatorio en dev (`randomBytes`), fail-fast en producción si falta env, `.env` real con secretos guardado localmente (gitignored, verificado con `git check-ignore`), y `--env-file-if-exists=.env` en los scripts npm. Lección LL-014 registrada.
 - [x] **Widgets de restaurante y salud**: `renderRestaurant` (mesas libre/ocupada + menú digital con toggle de disponibilidad + pedidos con flujo cocina: enviar a cocina → marcar servido → liberar mesa) y `renderHealth` (agenda del día con form de citas paciente/médico/fecha/hora + tabla de pacientes + tarjetas de médicos). Ambos con datos demo (`seedRestaurant`/`seedHealth`) y verificado en navegador.
 - [x] **Widget de tienda (e-commerce)**: `renderShop` con catálogo (búsqueda + filtro por categoría), carrito lateral con cantidades, checkout que crea `Order`+`OrderItem` y descuenta stock, toast no bloqueante. `seedShop` siembra productos demo. Verificado en navegador (añadir al carrito → contador, comprar → pedido).
 - [x] **Widgets "muertos" arreglados**: `renderApp` reordenado — los widgets específicos (fidelidad, tienda, gastos, todo, blog, landing) ahora tienen prioridad sobre el CRUD genérico. Antes el CRUD los pisaba siempre (todo/gastos/blog/landing nunca se renderizaban). Verificado: todo→widget, tienda→widget, resto→CRUD.

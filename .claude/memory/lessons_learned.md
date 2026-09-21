@@ -105,6 +105,13 @@ Each lesson entry should include:
 - **Context:** El backend de CASF Studio quedó en bucle de reinicio mientras trabajaba; un monitor de terminal con patrón `/running on|Error/` notificó 70+ veces.
 - **Action:** Acotar el watch al código fuente con `--watch-path=./src` (o configurar `ignore`). Verificar con `grep -c Restarting` que el conteo sea 0 tras unos segundos. Los artefactos de runtime (BD, logs, memoria, output generado) nunca deben estar dentro del árbol observado.
 
+### LL-014: Secretos hardcodeados como "default de dev" activan GitGuardian y son riesgo real
+- **Date:** 2026-09-20
+- **Lesson:** Usar `JWT_SECRET ?? "***REMOVED***"` o `ADMIN_PASSWORD ?? "***REMOVED***"` como "defaults para que corra sin configurar" dispara alertas de secret scanning (GitGuardian) en el repositorio remoto, y son un riesgo real: una contraseña de admin fija o un secreto JWT predecible permite forjar tokens y suplantar usuarios si alguien despliega sin cambiar el default.
+- **Category:** Security
+- **Context:** El usuario reportó un correo de GitGuardian con "incidentes de privacidad/secretos" en los repos. La causa eran 4 defaults hardcodeados en `auth.ts`, `seed-admin.ts` y el runtime generado por `materializer.ts`.
+- **Action:** Nunca ship un secreto fijo. Patrón correcto: (1) en producción, `process.env.X` es obligatorio y se hace fail-fast si falta; (2) en desarrollo, generar un valor aleatorio efímero (`randomBytes`); (3) guardar los secretos reales de prueba en `.env` (gitignored), no en el código; (4) verificar con `git check-ignore` que el archivo no se rastrea. El correo de GitGuardian trae el hash exacto del commit ofensor — los defaults "inocentes" siguen contando como incidente porque viven en el historial.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
