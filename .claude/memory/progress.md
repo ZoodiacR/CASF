@@ -11,6 +11,10 @@
 - **Overall status:** 🟢 sprint completado + pulido del flujo + 5 verticales nuevos (e-commerce, restaurante, salud, educación, RRHH)
 
 ## ✅ Completed (most recent first)
+- [x] **Widget de tienda (e-commerce)**: `renderShop` con catálogo (búsqueda + filtro por categoría), carrito lateral con cantidades, checkout que crea `Order`+`OrderItem` y descuenta stock, toast no bloqueante. `seedShop` siembra productos demo. Verificado en navegador (añadir al carrito → contador, comprar → pedido).
+- [x] **Widgets "muertos" arreglados**: `renderApp` reordenado — los widgets específicos (fidelidad, tienda, gastos, todo, blog, landing) ahora tienen prioridad sobre el CRUD genérico. Antes el CRUD los pisaba siempre (todo/gastos/blog/landing nunca se renderizaban). Verificado: todo→widget, tienda→widget, resto→CRUD.
+- [x] **Fix de colisiones de keywords en widgets**: `factura` sacado de Expense (capturaba Invoicing SaaS), `saas/sass` sacado de Landing (capturaba cualquier SaaS), `catálogo` sacado de Shop (colisionaba con "catálogo de cursos" del LMS). 12 dominios verificados → widget correcto.
+- [x] **Fix del bucle de reinicio del dev-server**: `node --watch` observaba `data.db`/`state.json`/`generated/` que el propio servidor escribe → reinicio infinito (consumía CPU). `--watch-path=./src` lo acota al código. El monitor de terminal disparaba 70+ notificaciones por esto.
 - [x] **Pulido del flujo completo (CASF Studio)**: modo interactivo ya NO pierde decisiones — `handleBuild` auto-refina si el usuario no aplicó sus respuestas; indicador "Cambios sin aplicar" (chip warn); cache-busting del iframe de preview (`?v=`) al reconstruir; limpieza de estado (feedback/steps/activeFile) al regenerar y al logout; botón alternar resumen/memory.md claro. Verificado en navegador (moneda PEN→S/ aplicada sin "Aplicar decisiones").
 - [x] **5 dominios verticales ricos nuevos en `llm.ts`**: E-commerce Suite, Restaurant & Delivery, Health & Clinic Suite, Learning Management System, HR & Payroll Suite — cada uno con entidades completas, páginas y features ambiciosas (full-stack React/Express/Postgres). `isAmbitious` ampliado con verticales nuevos.
 - [x] **Fixes de colisión de keywords** (bug real encontrado): `hasWord` matcheaba `"lead"` dentro de `"empleados"` (substring) → CRM incorrecto. Arreglado: `lead`→`prospecto/leads`, `delivery` solo en Restaurant, `comida/cocina` solo en Restaurant, `producto/product` fuera de Inventory. Salud movido antes de Booking. Verificado con 9 prompts.
@@ -50,9 +54,9 @@
 
 ## ⏭️ Next actions (in order)
 1. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
-2. Conectar DeepSeek real cuando el usuario aporte su key
-3. Probar en navegador una app de un dominio nuevo (e-commerce/restaurante) para verificar estética
-4. Registrar lección aprendida (LL-012: substring matching en keywords) en lessons_learned.md
+2. Widgets ricos para los demás dominios ambiciosos (restaurante, salud, LMS, RRHH, inventario) — hoy caen en CRUD genérico
+3. Conectar DeepSeek real cuando el usuario aporte su key
+4. Registrar lección LL-013 (watch → bucle) en lessons_learned.md
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).

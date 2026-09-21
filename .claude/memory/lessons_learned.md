@@ -98,6 +98,13 @@ Each lesson entry should include:
 - **Context:** Ampliando los dominios verticales del generador de specs (`llm.ts`).
 - **Action:** Al hacer keyword matching sobre texto natural, usar límites de palabra (`\b`) o normalizar, y **testear con prompts reales** que contengan la colisión ("empleados" vs "lead"). Preferir keywords específicas del idioma ("prospecto/leads" en vez de "lead" a secas) cuando el préstamo lingüístico colisione con léxico nativo.
 
+### LL-013: Un watcher que observa archivos que el servidor escribe entra en bucle
+- **Date:** 2026-09-20
+- **Lesson:** `node --watch` (sin `--watch-path`) observa **todo** el directorio, incluidos `data.db`, `data/state.json`, `memory.md` y `generated/` — que el propio servidor escribe en cada request (registro de actividad, build). Cada escritura dispara un reinicio, y el reinicio vuelve a escribir, en un bucle infinito que consume CPU y dispara decenas de notificaciones de monitor sin que nada parezca "romperse" (el log solo repite "running on" + "Restarting").
+- **Category:** Technical
+- **Context:** El backend de CASF Studio quedó en bucle de reinicio mientras trabajaba; un monitor de terminal con patrón `/running on|Error/` notificó 70+ veces.
+- **Action:** Acotar el watch al código fuente con `--watch-path=./src` (o configurar `ignore`). Verificar con `grep -c Restarting` que el conteo sea 0 tras unos segundos. Los artefactos de runtime (BD, logs, memoria, output generado) nunca deben estar dentro del árbol observado.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
