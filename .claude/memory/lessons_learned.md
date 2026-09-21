@@ -91,6 +91,13 @@ Each lesson entry should include:
 - **Context:** Diseñando el check-in QR automático para el SaaS de fidelidad.
 - **Action:** Antes de declarar inviabilidad técnica, **buscar en la web** (WebSearch) la solución vigente. Distinguir entre "no hay API pública gratuita" y "no existe forma de hacerlo". El usuario suele tener razón sobre lo que el mercado ya hace.
 
+### LL-012: El substring matching sin límites de palabra crea falsos positivos
+- **Date:** 2026-09-20
+- **Lesson:** La detección de dominios usaba `p.includes("lead")`, que es `true` para "emp**lead**os" (la palabra española "empleados" contiene la subcadena inglesa "lead"). Resultado: "sistema de nómina y empleados" se clasificaba como **CRM** en vez de **HR**. El mismo bug con "delivery" (E-commerce vs Restaurant) y "comida/cocina" (Receta vs Restaurant).
+- **Category:** Technical
+- **Context:** Ampliando los dominios verticales del generador de specs (`llm.ts`).
+- **Action:** Al hacer keyword matching sobre texto natural, usar límites de palabra (`\b`) o normalizar, y **testear con prompts reales** que contengan la colisión ("empleados" vs "lead"). Preferir keywords específicas del idioma ("prospecto/leads" en vez de "lead" a secas) cuando el préstamo lingüístico colisione con léxico nativo.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

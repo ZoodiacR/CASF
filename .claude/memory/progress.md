@@ -7,10 +7,13 @@
 - **Lifecycle stage:** Ship (cierre de Sprint 1)
 - **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
 - **Working branch:** main
-- **Last commit:** pendiente (commit de identidad + GitHub Actions)
-- **Overall status:** 🟢 sprint completado (identidad automática + GH Actions + panel dueño verificado)
+- **Last commit:** feat(llm): 5 nuevos dominios verticales + pulido del flujo
+- **Overall status:** 🟢 sprint completado + pulido del flujo + 5 verticales nuevos (e-commerce, restaurante, salud, educación, RRHH)
 
 ## ✅ Completed (most recent first)
+- [x] **Pulido del flujo completo (CASF Studio)**: modo interactivo ya NO pierde decisiones — `handleBuild` auto-refina si el usuario no aplicó sus respuestas; indicador "Cambios sin aplicar" (chip warn); cache-busting del iframe de preview (`?v=`) al reconstruir; limpieza de estado (feedback/steps/activeFile) al regenerar y al logout; botón alternar resumen/memory.md claro. Verificado en navegador (moneda PEN→S/ aplicada sin "Aplicar decisiones").
+- [x] **5 dominios verticales ricos nuevos en `llm.ts`**: E-commerce Suite, Restaurant & Delivery, Health & Clinic Suite, Learning Management System, HR & Payroll Suite — cada uno con entidades completas, páginas y features ambiciosas (full-stack React/Express/Postgres). `isAmbitious` ampliado con verticales nuevos.
+- [x] **Fixes de colisión de keywords** (bug real encontrado): `hasWord` matcheaba `"lead"` dentro de `"empleados"` (substring) → CRM incorrecto. Arreglado: `lead`→`prospecto/leads`, `delivery` solo en Restaurant, `comida/cocina` solo en Restaurant, `producto/product` fuera de Inventory. Salud movido antes de Booking. Verificado con 9 prompts.
 - [x] **Identidad automatizada en check-in QR**: capa `IdentityProvider` (mock + Open Gateway KYC-Match + JSON.pe). El cliente escribe SOLO su teléfono → el sistema resuelve nombre + DNI/CE automáticamente (verificado en navegador). Soporta DNI y Carné de Extranjería (CE → Migraciones).
 - [x] **GitHub Actions CI/CD**: apps generadas + CASF Studio + framework con workflow `docker-build.yml` (build + publish a GHCR con `GITHUB_TOKEN`, sin secretos).
 - [x] **Panel del dueño SIEMPRE presente**: dashboard de staff/barberos + actividad del bot ya no depende de keywords — toda app de fidelidad/citas lo muestra (nunca se pierde la vista del dueño).
@@ -48,8 +51,8 @@
 ## ⏭️ Next actions (in order)
 1. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
 2. Conectar DeepSeek real cuando el usuario aporte su key
-3. Commit de todo el trabajo reciente (identidad, GH Actions, panel dueño)
-4. Revisar y pulir el flujo completo (todo-en-uno, sin perder funcionalidades)
+3. Probar en navegador una app de un dominio nuevo (e-commerce/restaurante) para verificar estética
+4. Registrar lección aprendida (LL-012: substring matching en keywords) en lessons_learned.md
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).
@@ -69,13 +72,11 @@
 - Último costo registrado: ~$0.000161 por generación
 
 ## 📁 Files currently being edited
+- `casf-studio/backend/src/llm.ts` (5 dominios nuevos + fixes de colisión de keywords)
+- `casf-studio/frontend/src/App.tsx` (auto-refine al build, indicador dirty, cache-busting preview)
+- `casf-studio/frontend/src/i18n.ts` + `styles.css` (chip warn + traducciones)
+- `casf-studio/frontend/src/Memory.tsx` (botón alternar resumen/memory.md)
 - `casf-studio/backend/src/materializer.ts` (check-in QR + CRUD SaaS + Docker + widgets)
 - `casf-studio/backend/src/spec.ts` (applyFeedback complejo: entidad Employee, página /owner)
-- `casf-studio/backend/src/docs.ts` (listar artefactos del framework)
-- `casf-studio/backend/src/index.ts` (endpoints /api/docs, /api/spec/feedback, /api/spec/parse)
-- `casf-studio/frontend/src/Docs.tsx` + `App.tsx` (pestaña Docs + feedback UI + editor de spec)
-- `casf-studio/frontend/src/api.ts` (parseSpec) + `i18n.ts` + `styles.css` (editor)
-- `casf-studio/{backend,frontend}/Dockerfile` + `docker-compose.yml` (containerización)
-- `CASF/Dockerfile` (framework como volumen)
-- `CASF/docs/sprint/sprint_1_plan.md` (plan de sprint)**
+- `CASF/docs/sprint/sprint_1_plan.md` (plan de sprint)
 
