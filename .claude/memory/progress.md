@@ -11,6 +11,7 @@
 - **Overall status:** 🟢 sprint completado + pulido del flujo + 5 verticales nuevos (e-commerce, restaurante, salud, educación, RRHH)
 
 ## ✅ Completed (most recent first)
+- [x] **Widgets de restaurante y salud**: `renderRestaurant` (mesas libre/ocupada + menú digital con toggle de disponibilidad + pedidos con flujo cocina: enviar a cocina → marcar servido → liberar mesa) y `renderHealth` (agenda del día con form de citas paciente/médico/fecha/hora + tabla de pacientes + tarjetas de médicos). Ambos con datos demo (`seedRestaurant`/`seedHealth`) y verificado en navegador.
 - [x] **Widget de tienda (e-commerce)**: `renderShop` con catálogo (búsqueda + filtro por categoría), carrito lateral con cantidades, checkout que crea `Order`+`OrderItem` y descuenta stock, toast no bloqueante. `seedShop` siembra productos demo. Verificado en navegador (añadir al carrito → contador, comprar → pedido).
 - [x] **Widgets "muertos" arreglados**: `renderApp` reordenado — los widgets específicos (fidelidad, tienda, gastos, todo, blog, landing) ahora tienen prioridad sobre el CRUD genérico. Antes el CRUD los pisaba siempre (todo/gastos/blog/landing nunca se renderizaban). Verificado: todo→widget, tienda→widget, resto→CRUD.
 - [x] **Fix de colisiones de keywords en widgets**: `factura` sacado de Expense (capturaba Invoicing SaaS), `saas/sass` sacado de Landing (capturaba cualquier SaaS), `catálogo` sacado de Shop (colisionaba con "catálogo de cursos" del LMS). 12 dominios verificados → widget correcto.
@@ -54,9 +55,8 @@
 
 ## ⏭️ Next actions (in order)
 1. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
-2. Widgets ricos para los demás dominios ambiciosos (restaurante, salud, LMS, RRHH, inventario) — hoy caen en CRUD genérico
+2. Widgets para los últimos dominios ambiciosos (LMS, RRHH, inventario) — hoy caen en CRUD genérico
 3. Conectar DeepSeek real cuando el usuario aporte su key
-4. Registrar lección LL-013 (watch → bucle) en lessons_learned.md
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).
