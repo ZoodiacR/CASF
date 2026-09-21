@@ -119,6 +119,13 @@ Each lesson entry should include:
 - **Context:** Tras corregir los defaults (LL-014), el usuario pidió purgar el historial de ambos repos (`casf-studio` y `CASF`) para que GitGuardian dejara de reportar los commits ofensores.
 - **Action:** Procedimiento verificado: (1) `pip install git-filter-repo`; (2) crear un archivo de reemplazo `OLD==>***REMOVED***`; (3) backup con `git bundle create`; (4) `git filter-repo --replace-text <archivo> --force` (atención: borra el remote `origin`); (5) re-agregar `git remote add origin <url>`; (6) verificar con `git log --all -S <secreto> --oneline | wc -l` que el conteo es 0; (7) `git push --force origin main`; (8) borrar los bundles de backup (contienen el historial viejo con los secretos). Efectos: **todos los SHAs cambian** y se rompen clones/PRs existentes — es irreversible. Hacer backup ANTES y verificar DESPUÉS.
 
+### LL-016: El spec debe declarar la arquitectura, no asumirla — y el materializador debe reflejarla
+- **Date:** 2026-09-20
+- **Lesson:** El materializador generaba todo plano en la raíz (`index.html` + `server.js` + `schema.sql` juntos), contradiciendo lo que los agentes del framework (backend_architect, frontend_architect) exigen (capas separadas, frontend/ + backend/). La raíz del problema era doble: (1) el spec no declaraba arquitectura alguna, y (2) el materializador no tenía una convención que respetar. Sin una sección `## Architecture` en el spec y sin una regla en el blueprint, cada generación "improvisaba" la estructura.
+- **Category:** Architecture
+- **Context:** El usuario detectó que los proyectos generados no seguían ninguna arquitectura limpia (front/back por carpetas), a diferencia de lo que hacía su agente antes.
+- **Action:** (1) El `SYSTEM_PROMPT` y el mock **deben** generar una sección `## Architecture` (monorepo layout, capas, comunicación, auth, persistencia, robustez); (2) el materializador debe seguir **siempre** el monorepo `frontend/` + `backend/` + raíz (docker/CI/docs); (3) limpiar el directorio del slug con `rmSync` antes de regenerar para no dejar archivos huérfanos de layouts anteriores; (4) documentar la convención en el blueprint y en los agentes para que no se repita. Docker y preview deben apuntar a las rutas nuevas (`/slug/frontend/index.html`, `backend/.env`).
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

@@ -72,6 +72,40 @@ prompt breve ──► detectar dominio (keywords) ──► plantilla rica del 
 
 ---
 
+## 3bis. El Patrón de Arquitectura de Proyectos Generados (estructura limpia)
+
+**Regla no negociable:** todo proyecto generado por el materializador sigue una **arquitectura limpia de monorepo** con `frontend/` y `backend/` separados. Nunca se genera un "todo plano" en la raíz (ni `index.html` + `server.js` sueltos).
+
+```
+proyecto/
+├── frontend/            # app estática autocontenida
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
+├── backend/             # solo si es full-stack (ambicioso)
+│   ├── server.js        # API Express + JWT + sirve ../frontend (single origin)
+│   ├── schema.sql       # Postgres versionado
+│   ├── package.json
+│   └── .env.example
+├── project.md           # spec legible (fuente de verdad)
+├── README.md            # arquitectura + estructura + arranque
+├── manifest.json        # spec normalizado (machine-readable)
+├── Dockerfile           # multi-stage Node (full-stack) o nginx (static)
+├── docker-compose.yml   # app + postgres (o solo web static)
+├── .dockerignore
+└── .github/workflows/docker-build.yml
+```
+
+**Reglas:**
+
+1. **Separación de concerns:** el frontend nunca llama a rutas de disco del backend; se comunican por HTTP (`fetch('/api/...')`). El backend sirve el frontend como estático (single origin) o lo hace nginx en producción.
+2. **El spec incluye una sección `## Architecture`** (monorepo layout, capas, comunicación, auth, persistencia). Tanto el `SYSTEM_PROMPT` (LLM real) como el mock (`architectureFor`) la generan. El `parseProjectMd` la lee y el `manifest.json` la persiste.
+3. **Docker coherente con la estructura:** el `Dockerfile` full-stack copia `backend/` y `frontend/` por separado (multi-stage Node + Postgres); el estático usa nginx copiando solo `frontend/`. El `docker-compose` monta `backend/schema.sql` en el init de Postgres.
+4. **El preview (`serve-generated.mjs`) y Studio apuntan a `/slug/frontend/index.html`**, no a la raíz.
+5. **Robustez en el spec:** para apps ambiciosas, la sección Architecture exige validación de entrada en el borde del servicio, queries parametrizadas, clasificación de errores (4xx/5xx), escrituras idempotentes, connection pooling y paginación.
+
+---
+
 ## 4. El Patrón de Decisiones (interactivo vs manos libres)
 
 El usuario **controla el proceso** sin fricción:

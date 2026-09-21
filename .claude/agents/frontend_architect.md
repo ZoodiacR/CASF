@@ -111,6 +111,7 @@ The frontend_architect operates under these rules from CLAUDE.md:
 - Never ignore performance (bundle size, render performance)
 - Never make components that are not reusable (violates DRY)
 - Never use presentational components for business logic
+- **Generated project layout (CASF materializer):** the frontend is a self-contained static app under `frontend/` (`index.html`, `styles.css`, `app.js`). It communicates with the backend exclusively over HTTP (`fetch('/api/...')`) and never reads backend files directly. Preview/serve paths point to `/slug/frontend/index.html`.
 
 ## Handoff Protocol
 The frontend_architect uses the following handoff protocol:

@@ -118,6 +118,8 @@ The backend_architect operates under these rules from CLAUDE.md:
 - Always include request IDs in logs for tracing
 - Always use appropriate HTTP status codes
 - Always document APIs with OpenAPI/Swagger
+- **Generated project layout (CASF materializer):** always separate `backend/` (Express API service) from `frontend/` (static app). The backend serves the frontend via `express.static(join(__dirname, "..", "frontend"))` for a single origin. Never generate a flat layout with `server.js` + `index.html` in the same folder.
+- **Architecture section in spec:** every generated spec must include an `## Architecture` section describing monorepo layout, layers (presentation/application/domain/infrastructure), communication (REST/JSON), auth (JWT + bcrypt), and persistence (Postgres with migrations).
 
 ## Handoff Protocol
 The backend_architect uses the following handoff protocol:

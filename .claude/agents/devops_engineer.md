@@ -113,6 +113,7 @@ The devops_engineer operates under these rules from CLAUDE.md:
 - Never deploy without monitoring
 - Never ignore security in infrastructure
 - Never use vulnerable container images
+- **Generated project Docker (CASF materializer):** Dockerfiles must match the monorepo layout — full-stack apps use a multi-stage Node image that copies `backend/` and `frontend/` separately and runs `backend/server.js`; static apps use nginx copying only `frontend/`. `docker-compose` mounts `backend/schema.sql` into Postgres init and reads `backend/.env`.
 
 ## Handoff Protocol
 The devops_engineer uses the following handoff protocol:

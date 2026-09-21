@@ -7,10 +7,13 @@
 - **Lifecycle stage:** Ship (cierre de Sprint 1)
 - **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
 - **Working branch:** main
-- **Last commit:** fix(security): eliminar secretos hardcodeados (GitGuardian)
-- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening de seguridad (GitGuardian)
+- **Last commit:** feat(clean-arch): estructura frontend/backend + spec con Architecture
+- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening seguridad + arquitectura limpia
 
 ## ✅ Completed (most recent first)
+- [x] **Arquitectura limpia en proyectos generados (frontend/ + backend/)**: `materialize()` ahora genera monorepo separado — `frontend/` (index.html, styles.css, app.js), `backend/` (server.js, schema.sql, package.json, .env.example), raíz (project.md, README, manifest, Docker, compose, CI). `rmSync` limpia el directorio antes de regenerar (sin archivos huérfanos). `server.js` sirve `../frontend` (single origin). Dockerfile multi-stage copia `backend/`+`frontend/` por separado; nginx copia solo `frontend/`. Preview (`serve-generated.mjs` + `App.tsx`) apuntan a `/slug/frontend/index.html`.
+- [x] **Sección `## Architecture` en el spec**: `SYSTEM_PROMPT` (LLM real) y mock (`architectureFor`) ahora generan arquitectura (monorepo layout, capas, comunicación REST, auth JWT+bcrypt, persistencia con migraciones, robustez: validación/queries parametrizadas/errores 4xx-5xx/paginación). `parseProjectMd` la lee, `specToMarkdown` la emite, `manifest.json` la persiste. Tipo `ProjectSpec.architecture?: string[]` añadido.
+- [x] **Documentación de la convención en framework**: `PATRON_DE_DISENO.md` ganó la sección "3bis. Patrón de Arquitectura de Proyectos Generados". `backend_architect`, `frontend_architect` y `devops_engineer` ahora exigen la estructura de carpetas limpia + Docker coherente.
 - [x] **Purga de historial Git (secretos)**: reescrito el historial completo de `casf-studio` y `CASF` con `git filter-repo --replace-text` + force-push a GitHub. Verificado con `git log -S` que los secretos ya no aparecen en ningún commit (0 ocurrencias en ambos repos). Backups (bundles) y archivo de reemplazo temporales eliminados tras verificar. Lección LL-015 registrada.
 - [x] **Hardening de secretos (GitGuardian)**: eliminados 4 secretos hardcodeados (`***REMOVED***`, `JWT_SECRET` fijos en `auth.ts`, `seed-admin.ts` y el runtime generado). Ahora: secreto JWT aleatorio en dev (`randomBytes`), fail-fast en producción si falta env, `.env` real con secretos guardado localmente (gitignored, verificado con `git check-ignore`), y `--env-file-if-exists=.env` en los scripts npm. Lección LL-014 registrada.
 - [x] **Widgets de restaurante y salud**: `renderRestaurant` (mesas libre/ocupada + menú digital con toggle de disponibilidad + pedidos con flujo cocina: enviar a cocina → marcar servido → liberar mesa) y `renderHealth` (agenda del día con form de citas paciente/médico/fecha/hora + tabla de pacientes + tarjetas de médicos). Ambos con datos demo (`seedRestaurant`/`seedHealth`) y verificado en navegador.
