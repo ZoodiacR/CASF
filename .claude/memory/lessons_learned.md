@@ -126,6 +126,13 @@ Each lesson entry should include:
 - **Context:** El usuario detectó que los proyectos generados no seguían ninguna arquitectura limpia (front/back por carpetas), a diferencia de lo que hacía su agente antes.
 - **Action:** (1) El `SYSTEM_PROMPT` y el mock **deben** generar una sección `## Architecture` (monorepo layout, capas, comunicación, auth, persistencia, robustez); (2) el materializador debe seguir **siempre** el monorepo `frontend/` + `backend/` + raíz (docker/CI/docs); (3) limpiar el directorio del slug con `rmSync` antes de regenerar para no dejar archivos huérfanos de layouts anteriores; (4) documentar la convención en el blueprint y en los agentes para que no se repita. Docker y preview deben apuntar a las rutas nuevas (`/slug/frontend/index.html`, `backend/.env`).
 
+### LL-017: El backend generado debe estar en capas y persistir de verdad — no un monolito con Map()
+- **Date:** 2026-09-20
+- **Lesson:** Un "backend" de un solo archivo con todo inline (rutas + auth + CRUD) y un `Map()` en memoria no es "sólido y escalable", aunque la carpeta se llame `backend/`. El spec declaraba React + PostgreSQL pero el materializador entregaba vanilla JS + un `Map()`, una brecha de credibilidad que un usuario detecta al instante. Además, el campo de auditoría `created_at` que añadía el enriquecimiento colisionaba con el `created_at` de la DDL generada (duplicado → crash de SQLite en el arranque).
+- **Category:** Architecture
+- **Context:** El usuario pidió "arquitectura full stack" real y "comenzar el roadmap" para que el producto sea comercializable. La evaluación honesta del estado anterior era: forma correcta (carpetas) pero fondo insuficiente (monolito + memoria).
+- **Action:** (1) Generar backend en capas: `server.js` (bootstrap) → `app.js` (middleware+rutas) → `auth.js`/`crud.js` (controladores) → `db.js` (infraestructura SQLite `node:sqlite`, cero deps nativas). (2) Persistencia real con `id TEXT` (UUID vía `randomUUID`) y `created_at` de auditoría; prohibir `Map()` en apps full-stack. (3) Validación por whitelist en el borde (rechaza tipos inválidos y campos no declarados; sin mass-assignment de `id`/`created_at`) + paginación `?page=&limit=`. (4) Filtrar los campos de auditoría (`id`, `created_at`) en DDL y CRUD para evitar duplicados — el enriquecimiento los añade como fields del spec, pero en el backend son gestionados por la DB. (5) Verificar con smoke test real (arrancar el backend generado, probar register/login/CRUD/paginación/validación), no solo `node --check`.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

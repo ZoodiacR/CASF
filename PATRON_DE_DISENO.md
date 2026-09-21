@@ -82,31 +82,40 @@ proyecto/
 │   ├── index.html
 │   ├── styles.css
 │   └── app.js
-├── backend/             # solo si es full-stack (ambicioso)
-│   ├── server.js        # API Express + JWT + sirve ../frontend (single origin)
-│   ├── schema.sql       # Postgres versionado
+├── backend/             # solo si es full-stack (ambicioso) — EN CAPAS
 │   ├── package.json
-│   └── .env.example
+│   ├── .env.example
+│   ├── schema.sql       # SQLite (documentación del shape)
+│   └── src/
+│       ├── server.js    # entrypoint (bootstrap + listen)
+│       ├── app.js       # express app + middleware + monta rutas
+│       ├── db.js        # SQLite (node:sqlite) — capa de infraestructura
+│       ├── auth.js      # JWT (register/login/me) + verificación de identidad
+│       └── crud.js      # fábrica CRUD (validación + paginación)
 ├── project.md           # spec legible (fuente de verdad)
 ├── README.md            # arquitectura + estructura + arranque
 ├── manifest.json        # spec normalizado (machine-readable)
-├── Dockerfile           # multi-stage Node (full-stack) o nginx (static)
-├── docker-compose.yml   # app + postgres (o solo web static)
+├── Dockerfile           # multi-stage Node 22 (full-stack) o nginx (static)
+├── docker-compose.yml   # app + volumen SQLite (o solo web static)
 ├── .dockerignore
 └── .github/workflows/docker-build.yml
 ```
 
 **Reglas:**
-
+   100|
 1. **Separación de concerns:** el frontend nunca llama a rutas de disco del backend; se comunican por HTTP (`fetch('/api/...')`). El backend sirve el frontend como estático (single origin) o lo hace nginx en producción.
-2. **El spec incluye una sección `## Architecture`** (monorepo layout, capas, comunicación, auth, persistencia). Tanto el `SYSTEM_PROMPT` (LLM real) como el mock (`architectureFor`) la generan. El `parseProjectMd` la lee y el `manifest.json` la persiste.
-3. **Docker coherente con la estructura:** el `Dockerfile` full-stack copia `backend/` y `frontend/` por separado (multi-stage Node + Postgres); el estático usa nginx copiando solo `frontend/`. El `docker-compose` monta `backend/schema.sql` en el init de Postgres.
-4. **El preview (`serve-generated.mjs`) y Studio apuntan a `/slug/frontend/index.html`**, no a la raíz.
-5. **Robustez en el spec:** para apps ambiciosas, la sección Architecture exige validación de entrada en el borde del servicio, queries parametrizadas, clasificación de errores (4xx/5xx), escrituras idempotentes, connection pooling y paginación.
+2. **Backend en capas (no monolito):** `server.js` (bootstrap) → `app.js` (middleware + rutas) → `auth.js`/`crud.js` (controladores/servicios) → `db.js` (persistencia). Nunca un solo archivo con todo inline.
+3. **Persistencia real:** SQLite vía `node:sqlite` (cero dependencias nativas), con `id TEXT PRIMARY KEY` (UUID) y `created_at` de auditoría. El store en memoria `Map()` está **prohibido** para apps full-stack.
+4. **Validación y paginación en el borde:** el CRUD valida tipos (whitelist), rechaza campos no declarados (no mass-assignment de `id`/`created_at`), y soporta `?page=&limit=` devolviendo `{ data, page, limit, total, totalPages }`. Sin `?page=`, devuelve array plano (compatibilidad con el frontend).
+5. **El spec incluye una sección `## Architecture`** (monorepo layout, capas, comunicación, auth, persistencia). Tanto el `SYSTEM_PROMPT` (LLM real) como el mock (`architectureFor`) la generan. El `parseProjectMd` la lee y el `manifest.json` la persiste.
+6. **Docker coherente con la estructura:** el `Dockerfile` full-stack es multi-stage Node 22 que copia `backend/` + `frontend/` y ejecuta `node --experimental-sqlite backend/src/server.js`; el estático usa nginx. El `docker-compose` monta un volumen para `DB_PATH`.
+7. **El preview (`serve-generated.mjs`) y Studio apuntan a `/slug/frontend/index.html`**, no a la raíz.
+8. **Robustez en el spec:** para apps ambiciosas, la sección Architecture exige validación de entrada, queries parametrizadas, clasificación de errores (4xx/5xx), escrituras idempotentes (UUID), y paginación.
 
 ---
 
 ## 4. El Patrón de Decisiones (interactivo vs manos libres)
+   110|
 
 El usuario **controla el proceso** sin fricción:
 
