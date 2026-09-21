@@ -7,10 +7,11 @@
 - **Lifecycle stage:** Ship (cierre de Sprint 1)
 - **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
 - **Working branch:** main
-- **Last commit:** feat(clean-arch): estructura frontend/backend + spec con Architecture
-- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening seguridad + arquitectura limpia
+- **Last commit:** docs(roadmap): añadir Etapa 5.5 control de límites anti-pérdidas (P0)
+- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening seguridad + arquitectura limpia + roadmap actualizado con control de límites
 
 ## ✅ Completed (most recent first)
+- [x] **Documentación de control de límites (Etapa 5.5)**: añadida al roadmap (`ETAPAS_SIGUIENTES.md`) como P0 (crítico antes de beta pública). Especifica límites hard por plan (Free: 3 apps/mes, Pro: 50 apps/mes), contadores en tiempo real, validación server-side antes de consumir recursos, reset mensual automático, dashboard de uso, manejo de casos extremos (cancelaciones, bypass, transacciones atómicas). Criterios de done verificables + tests automatizados. Costo estimado: ~$8-12 tokens. **Protege el margen de negocio** — sin esto el producto puede operar a pérdida desde el día 1.
 - [x] **Backend generado en capas (no monolito) + SQLite real**: `serverJs()` monolítico reemplazado por 5 archivos con capas (`src/server.js` bootstrap, `src/app.js` middleware+rutas, `src/db.js` SQLite `node:sqlite`, `src/auth.js` JWT+identidad, `src/crud.js` fábrica CRUD). Persistencia SQLite real (UUID + `created_at` auditoría, sin `Map()` en memoria). Validación de tipos por whitelist (rechaza campos no declarados, no mass-assignment de `id`/`created_at`), paginación `?page=&limit=` → `{data,page,limit,total,totalPages}` (sin `page` devuelve array plano por compatibilidad con el frontend). Dockerfile Node 22 multi-stage con `--experimental-sqlite`; docker-compose con volumen `DB_PATH`. **Smoke test real verificado**: health + register/login (JWT+UUID) + CRUD + paginación + validación 400.
 - [x] **Arquitectura limpia en proyectos generados (frontend/ + backend/)**: `materialize()` genera monorepo separado — `frontend/`, `backend/`, raíz (project.md, README, manifest, Docker, compose, CI). `rmSync` limpia antes de regenerar. Preview apunta a `/slug/frontend/index.html`.
 - [x] **Sección `## Architecture` en el spec**: `SYSTEM_PROMPT` (LLM real) y mock (`architectureFor`) generan arquitectura. `parseProjectMd` la lee, `specToMarkdown` la emite, `manifest.json` la persiste. Tipo `ProjectSpec.architecture?: string[]`.
