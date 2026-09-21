@@ -112,6 +112,13 @@ Each lesson entry should include:
 - **Context:** El usuario reportó un correo de GitGuardian con "incidentes de privacidad/secretos" en los repos. La causa eran 4 defaults hardcodeados en `auth.ts`, `seed-admin.ts` y el runtime generado por `materializer.ts`.
 - **Action:** Nunca ship un secreto fijo. Patrón correcto: (1) en producción, `process.env.X` es obligatorio y se hace fail-fast si falta; (2) en desarrollo, generar un valor aleatorio efímero (`randomBytes`); (3) guardar los secretos reales de prueba en `.env` (gitignored), no en el código; (4) verificar con `git check-ignore` que el archivo no se rastrea. El correo de GitGuardian trae el hash exacto del commit ofensor — los defaults "inocentes" siguen contando como incidente porque viven en el historial.
 
+### LL-015: Corregir un secreto en HEAD no basta — hay que reescribir el historial completo
+- **Date:** 2026-09-20
+- **Lesson:** GitGuardian (y cualquier secret scanner) escanea **todo** el historial, no solo el HEAD. Corregir el default hardcodeado en el commit actual no apaga la alerta: el valor filtrado sigue vivo en los commits viejos. La única forma de limpiarlo es reescribir el historial con `git filter-repo --replace-text` y force-push.
+- **Category:** Security
+- **Context:** Tras corregir los defaults (LL-014), el usuario pidió purgar el historial de ambos repos (`casf-studio` y `CASF`) para que GitGuardian dejara de reportar los commits ofensores.
+- **Action:** Procedimiento verificado: (1) `pip install git-filter-repo`; (2) crear un archivo de reemplazo `OLD==>***REMOVED***`; (3) backup con `git bundle create`; (4) `git filter-repo --replace-text <archivo> --force` (atención: borra el remote `origin`); (5) re-agregar `git remote add origin <url>`; (6) verificar con `git log --all -S <secreto> --oneline | wc -l` que el conteo es 0; (7) `git push --force origin main`; (8) borrar los bundles de backup (contienen el historial viejo con los secretos). Efectos: **todos los SHAs cambian** y se rompen clones/PRs existentes — es irreversible. Hacer backup ANTES y verificar DESPUÉS.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
