@@ -56,13 +56,13 @@
 5. **Prueba de fuego end-to-end**
    - Acceptance: prompt breve → spec rico → decisiones → build → app visible en preview `:8090`
    - Effort: 1 sesión
-   - Status: ⏳ Pending
+   - Status: ✅ Done
 
 ### Retrospectiva (project_orchestrator)
 6. **Retro + actualizar memoria del framework**
    - Acceptance: `progress.md` actualizado con resultados; lecciones registradas en `lessons_learned.md`
    - Effort: 1 sesión
-   - Status: ⏳ Pending
+   - Status: ✅ Done
 
 ## Execution Plan
 
@@ -94,4 +94,28 @@
 - La memoria del framework refleja todo el proceso para poder retomarlo
 
 ---
+
+## Retrospectiva (Sprint 1)
+
+### ✅ Qué salió bien
+1. **Prompt breve → SaaS completo**: "app de fidelidad con QR, citas y puntos" produce un spec rico (5+ entidades, 14 features, full-stack) con el paso de enriquecimiento.
+2. **Materializador funcional**: CRUD real de clientes, citas, recompensas, servicios y puntos; QR por cliente; bot de ayuda que reserva citas; dashboard del dueño con staff/barberos + log del bot.
+3. **Visibilidad total**: el proceso (spec → decisiones → build → preview en iframe) se ve en vivo en CASF Studio, con pestañas Docs, Memoria y consumo.
+4. **Feedback iterativo**: el usuario ajusta el spec por lenguaje natural O editando el `project.md` directamente.
+5. **Docker + GitHub Actions**: todas las apps + Studio + framework containerizados y con CI/CD a GHCR sin secretos.
+
+### ⚠️ Qué no salió tan bien
+1. **Bug de stack estático**: una app de fidelidad (multi-usuario con CRUD) se generó como estática por un `isAmbitious` incompleto → corregido añadiendo keywords de dominio vertical (LL en lessons_learned.md).
+2. **Escapado en template literals**: `\n` y `/` dentro de los template literals del materializador rompían el `app.js` generado → corregido con doble escape.
+3. **Dashboard del dueño condicionado a keywords**: inicialmente solo aparecía si el spec mencionaba "owner/barbero" → corregido: siempre visible en apps de fidelidad/citas.
+4. **Afirmación apresurada de inviabilidad**: dije que "no se puede" resolver identidad automática sin investigar → la web (Open Gateway KYC-Match, RENIEC, JSON.pe) demuestra que SÍ se puede (lección LL-011).
+
+### 📈 Acciones de mejora (para Sprint 2)
+1. **Persistencia real del check-in/QR** contra la BD (hoy localStorage en preview) — usar `/api/Employee` + transacciones de puntos cuando hay backend.
+2. **Conectar LLM real (DeepSeek)** para specs aún más ricos cuando el usuario aporte su key.
+3. **Pulir el flujo completo** (todo-en-uno, sin perder funcionalidades) — revisar edge cases del materializador.
+4. **Proveedor de identidad real** (Open Gateway/JSON.pe) cuando haya credenciales; el mock ya valida el flujo.
+
+---
+
 <!-- CASF v1.0 · sprint plan -->

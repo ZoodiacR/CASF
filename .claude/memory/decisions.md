@@ -77,6 +77,12 @@ Each decision entry should include:
 - **Rationale:** Despliegue con un solo comando (`docker compose up`), portabilidad, y consistencia con el cap. 16 (DevOps) de la constitución. El usuario lo pidió explícitamente por su utilidad.
 - **Impact:** `materializer.ts` (`dockerfile`, `dockerCompose`, `dockerignore`), `casf-studio/{backend,frontend}/Dockerfile`, `casf-studio/docker-compose.yml`, `CASF/Dockerfile`.
 
+### 2026-09-20: Identidad automatizada en el check-in QR (capa IdentityProvider)
+- **Decision:** El check-in por QR resuelve la identidad del cliente de forma **automática** (teléfono → nombre + DNI/CE) mediante una capa `IdentityProvider` (mismo patrón que `LLMProvider`/`PaymentProvider`). Proveedores: `mock` (demo), `opengateway` (GSMA Open Gateway KYC-Match: valida DNI↔teléfono contra la operadora, sin que el usuario teclee), `jsonpe` (agregador autorizado JSON.pe para DNI, arranca hoy sin convenio). Soporta **DNI** y **Carné de Extranjería (CE)** — el CE lo verifica **Migraciones**, no RENIEC.
+- **Category:** Architecture / Product
+- **Rationale:** El usuario quiere la "maravilla": escanear el QR y que la identidad se resuelva sola. Investigado con fuentes oficiales 2026: SÍ es posible vía Open Gateway KYC-Match (operadora identifica por SIM/IP), RENIEC Web Service (S/0.40/consulta, convenio), Migraciones (CE), o agregadores (JSON.pe). No hay BD pública "teléfono→DNI"; la vía legítima es KYC contra la operadora o RENIEC/Migraciones.
+- **Impact:** `backend/src/identity.ts` (nuevo: `IdentityProvider`, `MockIdentityProvider`, `OpenGatewayKycProvider`, `JsonPeDniProvider`, validadores `isValidDni`/`isValidCe`), `backend/.env.example` (`IDENTITY_PROVIDER`, `OG_*`, `JSONPE_TOKEN`).
+
 ### 2026-09-20: Moneda restringida a USD/PEN (switch dólares ↔ soles)
 - **Decision:** El selector de moneda (pregunta de diseño interactiva) ofrece solo **USD** y **PEN** (soles), como switch binario, en lugar de las 7 monedas anteriores. El símbolo del sol es `S/`. El mapeo de feedback por lenguaje natural ya reconoce "dólares"/"soles"/"pen".
 - **Category:** Product

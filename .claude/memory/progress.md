@@ -4,13 +4,16 @@
 
 ## 📌 Snapshot
 - **Last updated:** 2026-09-20 (noche)
-- **Lifecycle stage:** Build
-- **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR)
+- **Lifecycle stage:** Ship (cierre de Sprint 1)
+- **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
 - **Working branch:** main
-- **Last commit:** f9f8b4d (sin commitear trabajo reciente)
-- **Overall status:** 🟡 in progress (check-in QR + Docker + CRUD SaaS + feedback complejo)
+- **Last commit:** pendiente (commit de identidad + GitHub Actions)
+- **Overall status:** 🟢 sprint completado (identidad automática + GH Actions + panel dueño verificado)
 
 ## ✅ Completed (most recent first)
+- [x] **Identidad automatizada en check-in QR**: capa `IdentityProvider` (mock + Open Gateway KYC-Match + JSON.pe). El cliente escribe SOLO su teléfono → el sistema resuelve nombre + DNI/CE automáticamente (verificado en navegador). Soporta DNI y Carné de Extranjería (CE → Migraciones).
+- [x] **GitHub Actions CI/CD**: apps generadas + CASF Studio + framework con workflow `docker-build.yml` (build + publish a GHCR con `GITHUB_TOKEN`, sin secretos).
+- [x] **Panel del dueño SIEMPRE presente**: dashboard de staff/barberos + actividad del bot ya no depende de keywords — toda app de fidelidad/citas lo muestra (nunca se pierde la vista del dueño).
 - [x] **Docker en apps generadas + CASF Studio + framework**: toda app generada incluye `Dockerfile` + `docker-compose.yml` + `.dockerignore` (full-stack → Node+Postgres; static → nginx). CASF Studio tiene compose (backend+frontend con proxy nginx). El framework tiene su propio `Dockerfile` (volumen montable).
 - [x] **Check-in por QR (fidelidad automática)**: el QR del negocio y el QR de cada cliente codifican una URL `#checkin[/id]`. Al escanear: registra la visita, suma puntos automáticamente y guarda al cliente en la BD. Vista de check-in es **solo la vista del cliente**; el dueño gestiona todo desde el panel SaaS.
 - [x] **Panel SaaS completo con CRUD**: servicios, recompensas, clientes, citas, puntos y (con feedback) staff/barberos — todo gestionable con CRUD real, no solo catálogo.
@@ -39,23 +42,18 @@
 - [x] **Estética rica en apps generadas**: CSS profesional, formato de moneda con símbolo, tema dark/light, i18n es/en
 
 ## 🔄 In progress
-- [ ] **Manejo delicado de secretos (API keys)** — prioridad alta (seguridad, cap. 13)
-  - [ ] Definir cómo el usuario aporta su API key sin que NUNCA se suba a GitHub
-  - [ ] `.env` + `.gitignore` estricto + `.env.example` documentado
-  - [ ] Mensaje en la UI: "pega tu key en `.env`, la app la lee de ahí" (nunca en el chat/código)
 - [ ] **Conectar LLM real (DeepSeek)** para specs ricos — pendiente de API key del usuario
 - [ ] **Persistencia real del check-in en BD** (hoy localStorage; con backend real debe usar `/api/Employee` + transacciones de puntos)
 
 ## ⏭️ Next actions (in order)
-1. Implementar manejo de secretos (.env + .gitignore + guía en UI)
-2. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
-3. Commit de todo el trabajo reciente (Docker, check-in QR, CRUD SaaS, feedback complejo)
-4. Conectar DeepSeek real cuando el usuario aporte su key
-5. PRUEBA FINAL end-to-end del flujo (prompt → spec → decisiones → build → app)
+1. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
+2. Conectar DeepSeek real cuando el usuario aporte su key
+3. Commit de todo el trabajo reciente (identidad, GH Actions, panel dueño)
+4. Revisar y pulir el flujo completo (todo-en-uno, sin perder funcionalidades)
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).
-- **Arranque del backend de apps generadas**: RESUELTO con **fallback localStorage** — en preview la app funciona sin backend; el `server.js` real se usa solo al desplegar (`npm start` o `docker compose up`). El preview `:8090` sirve el frontend y el runtime detecta y degrada gracefulmente.
+- **Identidad real (RENIEC/Open Gateway/Migraciones)**: la capa `IdentityProvider` está lista con mock; para producción requiere credenciales/convenio (Open Gateway KYC-Match, JSON.pe, RENIEC, Migraciones). El flujo y el modelo de datos no cambian.
 
 ## 🧠 Key context / recent decisions
 - **Flujo QR de fidelidad**: el QR NO es solo identificación — es el mecanismo de **check-in automático**: escanear → registrar llegada → sumar puntos → guardar en BD. La vista `#checkin` es para el cliente; el panel SaaS (CRUD) es para el dueño.

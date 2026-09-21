@@ -84,6 +84,13 @@ Each lesson entry should include:
 - **Context:** El usuario pidió Docker en todo lo generado por su utilidad.
 - **Action:** Incluir artefactos Docker en la salida del materializador por defecto, con variantes según stack (full-stack → Node+Postgres; static → nginx). Documentar el comando en el README generado.
 
+### LL-011: No afirmar "no se puede" sin investigar la web actual
+- **Date:** 2026-09-20
+- **Lesson:** Afirmé que "un navegador no puede leer el teléfono" y "no hay BD teléfono→DNI" como si fuera imposible. El usuario insistió y, al investigar fuentes oficiales 2026, descubrí que **sí es posible**: GSMA Open Gateway KYC-Match (la operadora identifica al usuario por SIM/IP y valida DNI↔teléfono), RENIEC Web Service (DNI) y Migraciones (CE), o agregadores (JSON.pe). Mi error fue confundir "requiere integración/convenio" con "imposible".
+- **Category:** Communication
+- **Context:** Diseñando el check-in QR automático para el SaaS de fidelidad.
+- **Action:** Antes de declarar inviabilidad técnica, **buscar en la web** (WebSearch) la solución vigente. Distinguir entre "no hay API pública gratuita" y "no existe forma de hacerlo". El usuario suele tener razón sobre lo que el mercado ya hace.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
