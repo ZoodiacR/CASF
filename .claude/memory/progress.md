@@ -3,7 +3,7 @@
 > ⚠️ **THIS IS THE RESUME FILE.** Updated by `context_manager` before/after every task. Read this first when resuming.
 
 ## 📌 Snapshot
-- **Last updated:** 2026-09-22 (noche)
+- **Last updated:** 2026-09-23 (madrugada) — cierre de sesión
 - **Lifecycle stage:** Build (Etapa 5.4–5.5 del roadmap — monetización)
 - **Current sprint:** Sprint 2 — Comercialización (Free demo + créditos + 402) — EN CURSO
 - **Working branch:** main
