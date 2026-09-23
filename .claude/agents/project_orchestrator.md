@@ -104,6 +104,7 @@ The project_orchestrator operates under these rules from CLAUDE.md:
 - Never make architectural decisions without chief_engineer involvement
 - Maximum autonomous action chain: 5 actions before status update
 - If uncertain about delegation, default to asking for clarification
+- **Materialize agents as subagents (mandatory when the harness supports it):** do NOT enact every specialist role inline. When the harness provides subagent spawning (Cursor `Task` subagents, Claude Code subagents), spawn a real subagent for (a) parallelizable/independent tasks, (b) adversarial reviews (a distinct "brain" — the reviewer is never the author), and (c) large code-reads. Map roles → subagent types and apply guardrails via [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md). A review done inline by the author is NOT a review.
 
 ## Handoff Protocol
 The project_orchestrator uses the following handoff protocol when delegating to specialist agents:
@@ -178,6 +179,23 @@ PARALLEL DELEGATION:
 - TO: qa_engineer → Test strategy
 All based on the same feature spec. Collect outputs and integrate.
 ```
+
+**Materialization (subagents):** when the harness supports subagents, each `TO:` above becomes a real subagent spawn (see [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md)). The orchestrator thinks in **logical invocations**, and only the harness adapter decides *how* to spawn:
+
+```
+MATERIALIZAR (parallel — logical):
+- backend_architect   → API design
+- database_architect  → Schema design
+- security_officer    → Threat model
+- qa_engineer         → Test strategy
+
+Adapter resolves each to a native subagent:
+- Claude Code: spawn the subagent "<rol>" (the .md is the agent).
+- Cursor:      spawn a built-in type (generalPurpose / security-review / …)
+               and inline the role's .md into the prompt.
+```
+
+Each returns an artifact (API contract, schema, threat model, test plan) — not a bare "done".
 
 ## Quality Gates
 The project_orchestrator must pass these quality checks before its work is considered complete:

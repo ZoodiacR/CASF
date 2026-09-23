@@ -109,7 +109,24 @@ Each decision entry should include:
 - **Rationale:** El usuario quiere ver "todo el proceso, documentación y planificación de sprints" dentro de Studio para tener control y visibilidad del framework trabajando.
 - **Impact:** `backend/src/docs.ts` (nuevo), `index.ts` (`/api/docs`), `frontend/src/Docs.tsx` (nuevo), `api.ts`, `App.tsx`, `i18n.ts`.
 
----
+### 2026-09-20: Free es demo; Build se paga (créditos o Pro)
+- **Decision:** Bajar Free a **spec demo (0 builds)**. Usar el producto = **crédito (~$4 / S/15 por build)** o **suscripción Pro $19 / Enterprise $99**. Packs 3×$10 y 10×$29. Ads en Free dejan de ser el plan A.
+- **Category:** Product
+- **Rationale:** Un Free que regala apps come COGS. $19 asusta a quien quiere una sola app; el crédito es el precio Yape-amigable. El crédito es más caro por unidad que Pro (~5 builds = $20) para no canibalizar el mensual.
+- **Impact:** Solo documentación: `ETAPAS_SIGUIENTES.md` (5.4–5.5) y `VENTAJAS_COMPETITIVAS.md` §4. Código se cablea en el sprint de cobro.
 
+### 2026-09-22: Cableado del cobro (créditos + 402 + límites) — código
+- **Decision:** Implementar en código el modelo "Free demo + créditos + Pro": Free construye 0 apps (2 specs/mes), el build se paga con 1 crédito (packs 1×$4, 3×$10, 10×$29) o Pro/Enterprise (cupo 50/∞ builds/mes). Gate **server-side** en `/api/build` (`402 PAYMENT_REQUIRED` sin créditos) y en `/api/spec/generate` (límite de specs). Cobro solo al éxito del build.
+- **Category:** Architecture + Product
+- **Rationale:** El límite debe validarse en el servidor (no en el cliente) para que no se pueda saltar; el crédito se descuenta solo si el materializador termina ok. Los contadores mensuales se resetean automáticamente por mes (`usage_month`), los créditos no caducan.
+- **Impact:** `db.ts` (columnas + migración idempotente + `credit_purchases`), `payments.ts` (`CREDIT_PACKS`, `PLAN_LIMITS`, `buyCredits`), `index.ts` (`authorizeBuild`/`authorizeSpec`, rutas `/api/billing/packs` y `/api/billing/credits`), frontend (`Pricing.tsx`, `api.ts`, `App.tsx`, `i18n.ts`). Smoke test `backend/smoke-monetization.mjs`.
+
+### 2026-09-22: Revisión adversarial + slices + quality spec (Etapa 9)
+- **Decision:** Integrar al framework un loop de calidad en dos puntos: (1) **post-implementación** — un `architecture_reviewer` adversarial que contrasta las hipótesis del `chief_engineer` (modo hipótesis) contra el código, y decide **refactor vs hardening**; la implementación se trata como un "cutre borrador" que se puede romper, pero justificando con qué se reemplaza. (2) **pre-build** — un `spec_quality_reviewer` que puntúa cada spec generado con una rúbrica de 12 dimensiones + red-lines (benchmark: `PROJECT_SPEC.md`). El desarrollo se divide en **slices** (checkpoints): slice → review → fix → hasta 2 intentos; lo no resuelto se anota PENDING y un **slice comodín** final (hasta 10 iteraciones) lo re-examina todo.
+- **Category:** Process
+- **Rationale:** Un solo review al final no atrapa ni un spec fino ni una implementación superficial. La fricción temprana (rúbrica del spec) evita builds genéricos; la fricción post-implementación (adversarial + slices) evita dar por "hecho" código que no aguanta el escrutinio. El límite de 2 intentos por hallazgo evita loops infinitos; el slice comodín evita que los pendientes se mueran silenciosamente.
+- **Impact:** Nuevos agentes `architecture_reviewer` y `spec_quality_reviewer`; template `spec_quality_rubric.md`; workflow `slice_review_workflow.md`; `chief_engineer.md` (modo hipótesis); `sprint_workflow.md` (Stage 2.5); `CLAUDE.md` (cap. 26 + apéndice); `ETAPAS_SIGUIENTES.md` (Etapa 9). Pendiente: cablear el gate de calidad del spec como endpoint real en CASF Studio.
+
+---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

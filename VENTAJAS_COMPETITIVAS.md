@@ -78,43 +78,42 @@ El bucle completo que CASF cubre (y que la competencia deja a medias):
 
 ## 4. Modelos de monetización
 
-### Modelo elegido (principal): Suscripción + margen interno
+### Modelo elegido (principal): Free demo + créditos + suscripción
+
+**Decisión (2026-09-20):** Free **no construye**. El uso real (Build) se paga. Hay dos vías de precio: **crédito barato** (una app) o **Pro/Enterprise** (si genera seguido). El usuario no ve el costo de tokens; ve “incluido en el crédito / el plan”.
 
 **Flujo de dinero:**
 ```
-Usuario paga suscripción fija (plan mensual/anual)
-        │
-        ▼
-CASF Studio paga las APIs de los modelos (DeepSeek, Claude, OpenAI…)
-        │
-        ▼
-Comisión interna (30%+ por arriba) se descuenta internamente
-        │
-        ▼
-El usuario NO ve el costo real de tokens — ve "incluido en tu plan"
+Gratis: idea → spec (demo, 1–2/mes)
+                 │
+        ¿Quieres la app en código?
+                 │
+     ┌───────────┴───────────┐
+  Crédito $4 / pack     Pro $19  o  Ent $99
+     └───────────┬───────────┘
+                 ▼
+     CASF paga DeepSeek (y opcional imágenes)
+                 ▼
+     Margen interno (crédito ~$3.80; Pro ~$14–17)
 ```
 
-**Reglas del modelo:**
-1. El usuario paga **una cuota fija** por el plan (no paga por token ni ve el gasto real).
-2. Ese dinero **financia las suscripciones/APIs de los modelos**.
-3. La **comisión (30% o más) se maneja interna**, "por arriba", sobre el costo real.
-4. La UI del usuario muestra **abstracción** (tokens usados / "cubierto por tu plan"), **nunca el costo en $ real**.
-5. El **costo real + margen** se trackea internamente (ledger + endpoint admin) para que el dueño audite rentabilidad.
+**Reglas:**
+1. **Free = probar el spec**, no llevarse el producto. 0 builds.
+2. **1 crédito = 1 Build** exitoso (~$4 / S/ 15). Packs: 3×$10, 10×$29. No caducan.
+3. **Pro $19/mes** gana si haces ~5+ apps/mes (5×$4 = $20). Así no se canibaliza.
+4. **Enterprise $99** para agencias / volumen con tope negociado.
+5. El usuario no ve $ de API. Admin sí (ledger + margen).
+6. Ads en Free: **no** son el plan A (sesión de demo corta).
 
-**En el código (implementado):**
-- `backend/src/cost.ts` → `costOf()` calcula el costo real del proveedor; `applyMargin()` aplica el margen interno.
-- `backend/src/ledger.ts` → guarda el costo real de cada llamada (interno, no expuesto al usuario).
-- Endpoint interno `/api/admin/cost` → costo real + margen para el dueño.
-- Endpoint público `/api/cost` → solo tokens/uso (sin $), para el dashboard del usuario.
+**En el código (hoy, aún el modelo viejo):** planes Free/Pro/Ent en `payments.ts` sin créditos ni 402 en Build. Cablear 5.4–5.5 en el sprint de cobro.
 
 ### Modelos complementarios (a futuro)
 
-1. **Pago por resultado (pay-per-app)** — cobrar por "build" materializado.
-2. **Licencia on-prem / self-hosted** — para empresas que no quieren enviar su código a terceros.
-3. **Marketplace de agentes/templates** — vender "blueprints" verticales.
-4. **Servicios/consultoría** — CASF como acelerador interno para agencias.
+1. Licencia on-prem / self-hosted.
+2. Marketplace de agentes/templates.
+3. Consultoría (implementar la app a un negocio real).
 
-**Margen clave:** CASF puede correr con `mock`/modelos baratos o locales en el arranque (costo marginal ≈ $0), lo que permite un **freemium rentable**.
+**Margen clave:** crédito a $4 con COGS DeepSeek de centavos; Pro con DeepSeek por defecto. Claude no va en el cupo barato.
 
 ---
 
@@ -128,6 +127,8 @@ El usuario NO ve el costo real de tokens — ve "incluido en tu plan"
   - **SOM** — capturable en 24-36 meses con un nicho (e.g., "especificación auditable + costos"): miles de clientes de pago.
 
 **Palanca de crecimiento:** la combinación "memoria + costos + spec" es naturalmente **viral en equipos** (el framework se comparte como repo, como Rails o un monorepo de reglas).
+
+Números operativos (costos, MRR mínimo, escenarios bueno/regular/malo/crítico y contingencias): ver `ETAPAS_SIGUIENTES.md` secciones **💰**, **📈** y **Apéndice B**. Este archivo no sustituye esa hoja: aquí está el *por qué* de negocio; allí está *cuánta plata hace falta para no fundirse*.
 
 ---
 

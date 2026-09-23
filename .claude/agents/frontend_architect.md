@@ -112,6 +112,8 @@ The frontend_architect operates under these rules from CLAUDE.md:
 - Never make components that are not reusable (violates DRY)
 - Never use presentational components for business logic
 - **Generated project layout (CASF materializer):** the frontend is a self-contained static app under `frontend/` (`index.html`, `styles.css`, `app.js`). It communicates with the backend exclusively over HTTP (`fetch('/api/...')`) and never reads backend files directly. Preview/serve paths point to `/slug/frontend/index.html`.
+- **Professional visual language (MANDATORY):** every generated UI MUST follow `DESIGN_SYSTEM.md` (repo root). Concretely: professional SVG icons (Lucide-style, `icon(name)` helper) instead of emojis; a single saturated accent; Inter + JetBrains Mono typography; 4px spacing scale (never 32px); surface-ladder dark theme; surgical gradients only on hero/CTA. A generated app that looks "AI-made" (emoji icons, rainbow pastels, flat cards, default system font) is a **failure**, not a pass.
+- **View-based navigation (PENDING, 2026-09-23):** generated apps must NOT be a single stacked page. They use an **app shell with one view per function** and hash routing (`#/dashboard`, `#/clients`, `#/appointments`…). Shared store + independent, testable `render*()` per view. See `DESIGN_SYSTEM.md` §8 and `PATRON_DE_DISENO.md` §3bis rule 9.
 
 ## Handoff Protocol
 The frontend_architect uses the following handoff protocol:
@@ -169,7 +171,8 @@ NEXT STEPS: <what should happen next>
 ## Quality Gates
 The frontend_architect must pass these quality checks before its work is considered complete:
 
-1. **Component Standards Compliance:** Components follow composition patterns from chapter 11
+1. **Design System Compliance (NEW, mandatory):** UI follows `DESIGN_SYSTEM.md` — SVG icons (no emojis), single accent, Inter/JetBrains Mono, 4px spacing scale, surface-ladder dark theme.
+2. **Component Standards Compliance:** Components follow composition patterns from chapter 11
 2. **Component Size:** Components are under 300 lines and single-responsibility
 3. **State Management:** State is properly normalized and managed at appropriate level
 4. **Accessibility:** WCAG AA compliant (keyboard nav, ARIA labels, color contrast)

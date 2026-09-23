@@ -57,18 +57,19 @@ prompt breve ──► detectar dominio (keywords) ──► plantilla rica del 
                                                     ├─ entidades completas (con fields de identidad + auditoría)
                                                     ├─ páginas reales (dashboard, CRUD, settings)
                                                     ├─ features base (búsqueda, exportar, responsive)
-                                                    ├─ features ambiciosos si aplica (auth, admin, roles, API)
-                                                    └─ stack según ambición (static vs full-stack)
+                                                    ├─ features de dominio (auth, admin, roles, API) si aplica
+                                                    └─ stack por INVARIANTE: data model ⇒ full-stack
 ```
 
 **Reglas del enriquecimiento (implementadas en `llm.ts`):**
 
-1. **Stack según ambición:** SaaS/CRM/inventario/multi-usuario ⇒ `React + Express + PostgreSQL`. Simple ⇒ static + localStorage.
+1. **Invariante de stack (data model ⇒ full-stack):** cualquier app con data model (entidades) es **full-stack**: `React + Node.js/Express + PostgreSQL`. Solo páginas de contenido puro sin data model (landing) son estáticas. NUNCA se decide por "ambición" (keywords subjetivas) — se decide por "¿maneja datos?".
 2. **Entidades completas:** toda entidad recibe campo de identidad + `created_at`. Los dominios de negocio tienen entidades relacionadas (no una sola tabla).
-3. **Features mínimas:** `búsqueda`, `exportar CSV`, `responsive` siempre. `auth`, `admin`, `roles`, `API REST` si es ambicioso.
+3. **Features mínimas:** `búsqueda`, `exportar CSV`, `responsive` siempre. `auth`, `admin`, `roles`, `API REST` en apps con data model.
 4. **Páginas reales:** dashboard + CRUD + settings, no "Home/About".
+5. **Dominio agnóstico al tipo de negocio (PENDIENTE, 2026-09-23):** el dominio loyalty/citas (`Loyalty & Appointments Suite`) debe servir a **cualquier negocio de servicios** (barbería, salón de uñas, masajes, clínica, gimnasio, etc.), como el spec original `PROJECT_SPEC.md` ("Loyalify"). **Prohibido** hardcodear datos verticales de barbería: servicios de ejemplo ("Corte de cabello", "Manicure", "Masaje"), staff ("Barbero senior/junior"), textos `staff: 'Staff / barberos'` y respuestas del bot. El dueño **configura sus propios** servicios y empleados al crear su negocio; el seed debe ser neutro (p. ej. "Servicio 1" genérico) o vacío con onboarding guiado. Aplica a: `llm.ts` (richSections, `empleado/barbero`), `materializer.ts` (seed de services/staff + `T_EN.staff`/`T_ES.staff` + bot).
 
-> Con un LLM real, este mismo enriquecimiento se hace en el `SYSTEM_PROMPT` (ver `spec.ts`), que **exige** Data Model completo y stack según ambición. El mock replica esa lógica de forma determinística.
+> Con un LLM real, este mismo enriquecimiento se hace en el `SYSTEM_PROMPT` (ver `spec.ts`), que **exige** Data Model completo y el mismo invariante (full-stack por defecto). El mock replica esa lógica de forma determinística, y `parseProjectMd` **normaliza** el stack post-parseo para garantizar el invariante incluso si el LLM devolviera "None".
 
 ---
 
@@ -82,7 +83,7 @@ proyecto/
 │   ├── index.html
 │   ├── styles.css
 │   └── app.js
-├── backend/             # solo si es full-stack (ambicioso) — EN CAPAS
+├── backend/             # presente siempre que haya data model (invariante full-stack) — EN CAPAS
 │   ├── package.json
 │   ├── .env.example
 │   ├── schema.sql       # SQLite (documentación del shape)
@@ -110,7 +111,8 @@ proyecto/
 5. **El spec incluye una sección `## Architecture`** (monorepo layout, capas, comunicación, auth, persistencia). Tanto el `SYSTEM_PROMPT` (LLM real) como el mock (`architectureFor`) la generan. El `parseProjectMd` la lee y el `manifest.json` la persiste.
 6. **Docker coherente con la estructura:** el `Dockerfile` full-stack es multi-stage Node 22 que copia `backend/` + `frontend/` y ejecuta `node --experimental-sqlite backend/src/server.js`; el estático usa nginx. El `docker-compose` monta un volumen para `DB_PATH`.
 7. **El preview (`serve-generated.mjs`) y Studio apuntan a `/slug/frontend/index.html`**, no a la raíz.
-8. **Robustez en el spec:** para apps ambiciosas, la sección Architecture exige validación de entrada, queries parametrizadas, clasificación de errores (4xx/5xx), escrituras idempotentes (UUID), y paginación.
+8. **Robustez en el spec:** para apps con data model, la sección Architecture exige validación de entrada, queries parametrizadas, clasificación de errores (4xx/5xx), escrituras idempotentes (UUID), y paginación.
+9. **Navegación por vistas (no single-page) — PENDIENTE (2026-09-23):** el frontend generado deja de ser **una sola página con todo apilado** y pasa a un **app shell con vistas por función** (`#/dashboard`, `#/clients`, `#/appointments`…). Cada vista renderiza **una** función; navegación por hash (sin framework); store compartido con `render*()` por vista (prepara el desmonte del `app.js` monolito, Etapa 1.2). Ver `DESIGN_SYSTEM.md` §8.
 
 ---
 
@@ -136,7 +138,7 @@ El usuario **controla el proceso** sin fricción:
 
 **Decisiones soportadas:** nombre, moneda (USD/EUR/MXN/ARS/COP/PEN/CLP), tema (dark/light), idioma (es/en), login (sí/no).
 
-**Regla:** una decisión **nunca** degrada el stack sin consecuencias conscientes. Si el usuario elige "sin login", el spec baja a estático; si elige "con login", se garantiza backend. Se registra en memoria como decisión.
+**Regla:** una decisión **nunca** degrada el stack sin consecuencias conscientes. "Sin login" **no** baja a estático: significa API pública (sin muro de login), manteniendo el monorepo full-stack. "Con login" garantiza el muro de auth. Se registra en memoria como decisión.
 
 ---
 

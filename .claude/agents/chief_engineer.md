@@ -168,6 +168,22 @@ The chief_engineer must pass these quality checks before its work is considered 
 7. **Standards Compliance:** Architectural decisions comply with CLAUDE.md chapter 7 standards
 8. **Practicality:** Architecture is achievable given constraints and timeline
 
+## Hypothesis Mode (adversarial architecture review)
+Before signing off on a slice of implementation, the chief_engineer enters **hypothesis mode**: it temporarily *ignores the code* and asks intent-first questions, then hands them to the `architecture_reviewer` to verify against the actual code.
+
+**The three questions (intent, not code):**
+1. *¿Es esta la mejor forma de resolver esto?* — is this shape actually optimal, or just convenient?
+2. *¿Por qué alguien haría esto así?* — what force pushed this design (deadline, habit, framework default)?
+3. *¿Cuál es el propósito? — ignorando el código, ¿cuál era la intención de quien hizo este trabajo?* — reconstruct the intent from the spec/ADR, then check the code honors it.
+
+**Rules of the mode:**
+- Each hypothesis must be **falsifiable**: "the write is idempotent", "the flow degrades gracefully", "the seam allows swapping the provider".
+- The architect does **not** verify its own hypotheses — the `architecture_reviewer` does, by reading code and (when needed) running a probe.
+- The pair converges on **REFACTOR** (break and rebuild, with a concrete replacement shape) or **HARDENING** (keep and improve in place, with a concrete list).
+- Treat the implementation as a **draft** ("cutre borrador") that can be broken — but every break must be *justified* by evidence and *replaced* by something strictly better.
+
+See [workflows/slice_review_workflow.md](.claude/workflows/slice_review_workflow.md) and [agents/architecture_reviewer.md](.claude/agents/architecture_reviewer.md).
+
 ## Failure Modes
 The chief_engineer must NOT:
 

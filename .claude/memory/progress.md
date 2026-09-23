@@ -3,14 +3,27 @@
 > ⚠️ **THIS IS THE RESUME FILE.** Updated by `context_manager` before/after every task. Read this first when resuming.
 
 ## 📌 Snapshot
-- **Last updated:** 2026-09-20 (noche)
-- **Lifecycle stage:** Ship (cierre de Sprint 1)
-- **Current sprint:** Sprint 1 (prueba de fuego — SaaS de fidelidad QR) — COMPLETADO
+- **Last updated:** 2026-09-22 (noche)
+- **Lifecycle stage:** Build (Etapa 5.4–5.5 del roadmap — monetización)
+- **Current sprint:** Sprint 2 — Comercialización (Free demo + créditos + 402) — EN CURSO
 - **Working branch:** main
-- **Last commit:** docs(roadmap): añadir Etapa 5.5 control de límites anti-pérdidas (P0)
-- **Overall status:** 🟢 sprint completado + pulido + widgets verticales + hardening seguridad + arquitectura limpia + roadmap actualizado con control de límites
+- **Last commit:** (local) monetización cableada en backend + frontend (créditos + 402 + límites)
+- **Overall status:** 🟢 Etapa 5.4–5.5 implementada y smoke-testeada (13/13). Falta pasarela real (Yape/Stripe) y tests automatizados en CI.
 
 ## ✅ Completed (most recent first)
+- [x] **Apps generadas bilingües (toggle ES/EN en vivo)**: el runtime ya no fija el idioma en el spec. `T` se separó en `T_EN`/`T_ES`; `setLang(lang)` re-renderiza `renderApp()` en el otro idioma, persiste en `localStorage('casf_lang')`, actualiza `document.documentElement.lang` y el botón. Botón `#lang-toggle` en el nav (muestra el idioma al que cambia). Todos los textos `T.*` y `EN ? ... : ...` cambian al instante; verificado en navegador (ES↔EN completo). `spec.lang` es solo el default.
+- [x] **README del producto bilingüe**: `casf-studio/README.md` ahora en inglés (cara internacional) + `README.es.md` en español (enlazados entre sí).
+- [x] **Docs clave del framework bilingües (ES/EN)**: creadas las versiones en inglés `CLAUDE.en.md` (constitución completa), `DESIGN_SYSTEM.en.md` y `ETAPAS_SIGUIENTES.en.md` (roadmap + presupuesto + ingresos), enlazadas desde sus originales en español. Los originales `.md` en español se mantienen como fuente canónica auto-cargada.
+- [x] **Etapa 2.3 — Animaciones y micro-interacciones (materializador)**: sistema de motion en el runtime de apps generadas — scroll-reveal por `IntersectionObserver` (sections `.reveal` → `.in`), entrada escalonada (stagger) en grids de tarjetas (kpi/loyalty/rewards/menu/tables/schedule/features), count-up de KPIs (preserva prefijo/sufijo "+"/moneda y restaura el texto original al final), hover-lift en cards, feedback de presión en botones (`:active` scale), skeleton shimmer (`.skeleton`), y `@media (prefers-reduced-motion:reduce)` que desactiva todo. `initMotion()` se llama al final de `renderApp()`. Tests 6/6 verde. Verificado en navegador.
+- [x] **Spec "rico" por defecto (mock + LLM real)**: el `spec_quality_reviewer` boteaba el mock por specs finos (20/100). Ahora el spec incluye **Roles (RBAC), Core UX Flow, MVP y Non-goals** (secciones nuevas en `ProjectSpec`, `specToMarkdown`, `parseProjectMd`, y regla 7 del `SYSTEM_PROMPT`). El dominio loyalty ganó **multi-tenancy** (entidad `Business` + `business_id` en todas las entidades) y **ledger de puntos inmutable** (`idempotency_key` en `PointsTransaction`). `mockSpec` emite las secciones vía `richSections()`.
+- [x] **Nombre de marca limpio en specs**: `deriveName` reescrito — ya no trunca el prompt ("SaaS Multi-tenant De Fidelización Con"); `extractBrandName` detecta nombre explícito ("llamada X", «X»), si no usa el `domain.name` ("Loyalty & Appointments Suite"). `mockSpec` ya no concatena `name + " — " + domain.name`.
+- [x] **Cero emojis como iconografía en runtime**: último emoji `⭐ Puntos` reemplazado por `sectionHeading('star', T.points)` (icono Lucide SVG). Los `✕`/`✓`/`★` restantes son controles funcionales (cerrar/confirmar/rating), no iconografía de sección.
+- [x] **Monetización cableada (Etapa 5.4–5.5, código)**: Free = demo (0 builds, 2 specs/mes). Build se paga con **créditos** (1 build = 1 crédito; packs 1×$4, 3×$10, 10×$29) o **Pro/Enterprise** (cupo mensual 50/∞). Lógica server-side en `index.ts` (`authorizeBuild`/`authorizeSpec`), esquema en `db.ts` (columnas `credits`/`usage_month`/`specs_used`/`builds_used` + migración idempotente + tabla `credit_purchases`), packs + límites en `payments.ts`. Frontend: pestaña Planes con sección de créditos, saldo en topbar, manejo de 402/403 con mensaje localizado. **Smoke test `backend/smoke-monetization.mjs` 13/13 verde** (register → 402 → compra pack1 → build 200 → crédito gastado → 402 → suscribe Pro → build 200 → builds_used=1).
+- [x] **Etapa 9 — Revisión adversarial + slices + quality spec (framework)**: integrada la idea de "arquitecto + revisor" post-implementación. Nuevo agente `architecture_reviewer` (modo evidencia, refactor vs hardening), `chief_engineer` con "modo hipótesis", agente `spec_quality_reviewer` + rúbrica `spec_quality_rubric.md` (12 dimensiones ponderadas + red-lines, benchmark `PROJECT_SPEC.md`), workflow `slice_review_workflow.md` (slices + max 2 fix + wildcard slice 10 iteraciones + escalada a refactor). Integrado en `sprint_workflow.md` (Stage 2.5), `CLAUDE.md` (cap. 26 + apéndice) y `ETAPAS_SIGUIENTES.md` (Etapa 9). Lección LL-018 + decisión registradas.
+- [x] **Etapa 1.1 — Tests del materializador (suite `npm test`, 6/6 verde)**: `backend/test/spec.test.ts` (round-trip `specToMarkdown`↔`parseProjectMd`, detección de 12 dominios, `applyAnswers`), `materializer.test.ts` (materializa 10 dominios → estructura limpia `frontend/`+`backend/`, `manifest.architecture`, `node --check` de todo el JS generado, limpieza de artefactos viejos con `rmSync`), `generated-backend.test.ts` (arranca el backend generado real: register → login JWT → CRUD → paginación `{data,total,totalPages}` → validación whitelist → 401 sin token). **Bug real cazado por el test**: la keyword `personal` de HR colisionaba con "gastos personales" → lo clasificaba ambicioso; se quitó `personal` de las keywords HR. Fix de teardown en Windows (esperar exit del proceso hijo + `rmWithRetry` por el lock de SQLite).
+
+- [x] **Modelo de planes (solo docs):** Free = demo (spec, 0 builds). Usar = crédito ~$4/S/15 o Pro $19 / Ent $99. Packs 3×$10 y 10×$29. Ads pasan a P3. Ver `ETAPAS_SIGUIENTES.md` 5.4–5.5 y `VENTAJAS_COMPETITIVAS.md` §4. **Sin cambios de código.**
+- [x] **Presupuesto recalculado + predicciones de ingresos + contingencias**: `ETAPAS_SIGUIENTES.md` ahora desglosa desarrollo (MVP $120–190, producto 1–7 $210–330), COGS por plan, umbrales de auto-sostenibilidad (nivel 1 = $150–220 MRR / 8–12 Pro; nivel 2 = $650–850 MRR), escenarios 12 meses (bueno/regular/malo/crítico) y Apéndice B con semáforo y kill switch. El total anterior (~$108–162) estaba incompleto.
 - [x] **Documentación de control de límites (Etapa 5.5)**: añadida al roadmap (`ETAPAS_SIGUIENTES.md`) como P0 (crítico antes de beta pública). Especifica límites hard por plan (Free: 3 apps/mes, Pro: 50 apps/mes), contadores en tiempo real, validación server-side antes de consumir recursos, reset mensual automático, dashboard de uso, manejo de casos extremos (cancelaciones, bypass, transacciones atómicas). Criterios de done verificables + tests automatizados. Costo estimado: ~$8-12 tokens. **Protege el margen de negocio** — sin esto el producto puede operar a pérdida desde el día 1.
 - [x] **Backend generado en capas (no monolito) + SQLite real**: `serverJs()` monolítico reemplazado por 5 archivos con capas (`src/server.js` bootstrap, `src/app.js` middleware+rutas, `src/db.js` SQLite `node:sqlite`, `src/auth.js` JWT+identidad, `src/crud.js` fábrica CRUD). Persistencia SQLite real (UUID + `created_at` auditoría, sin `Map()` en memoria). Validación de tipos por whitelist (rechaza campos no declarados, no mass-assignment de `id`/`created_at`), paginación `?page=&limit=` → `{data,page,limit,total,totalPages}` (sin `page` devuelve array plano por compatibilidad con el frontend). Dockerfile Node 22 multi-stage con `--experimental-sqlite`; docker-compose con volumen `DB_PATH`. **Smoke test real verificado**: health + register/login (JWT+UUID) + CRUD + paginación + validación 400.
 - [x] **Arquitectura limpia en proyectos generados (frontend/ + backend/)**: `materialize()` genera monorepo separado — `frontend/`, `backend/`, raíz (project.md, README, manifest, Docker, compose, CI). `rmSync` limpia antes de regenerar. Preview apunta a `/slug/frontend/index.html`.
@@ -57,13 +70,19 @@
 - [x] **Estética rica en apps generadas**: CSS profesional, formato de moneda con símbolo, tema dark/light, i18n es/en
 
 ## 🔄 In progress
+- [ ] **Etapa 2 — Diseño visual profesional** (prioridad del usuario): 2.1 design system ✅, 2.2 iconos SVG ✅, 2.3 animaciones ✅. **Falta 2.4 (componentes premium anti-IA: empty states, estados de error/éxito) y 2.5 (responsive + accesibilidad WCAG AA)**.
+- [ ] **Sprint 2 — Comercialización**: 5.4–5.5 cableado ✅. Falta 5.1 (Yape/transferencia real) y CI (1.1).
+- [ ] **Sprint 3 — Rediseño visual de CASF Studio**: slices (1) design system ✅, (2) topbar/nav, (3) chat+timeline, (4) dashboard, (5) planes/créditos, (6) login, (7) responsive + slice comodín. Loop adversarial por slice (chief_engineer hipótesis ↔ architecture_reviewer evidencia).
 - [ ] **Conectar LLM real (DeepSeek)** para specs ricos — pendiente de API key del usuario
-- [ ] **Persistencia real del check-in en BD** (hoy localStorage; con backend real debe usar `/api/Employee` + transacciones de puntos)
 
 ## ⏭️ Next actions (in order)
-1. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
-2. Widgets para los últimos dominios ambiciosos (LMS, RRHH, inventario) — hoy caen en CRUD genérico
-3. Conectar DeepSeek real cuando el usuario aporte su key
+1. **Navegación por vistas (app shell) en apps generadas** ⭐ — corregir el "single-page con todo apilado": barra lateral/tabs con una función por vista (`#/dashboard`, `#/clients`, `#/appointments`…), hash routing, store compartido + `render*()` por vista. Ver `DESIGN_SYSTEM.md` §8 y `PATRON_DE_DISENO.md` §3bis regla 9.
+2. **Dominio agnóstico al tipo de negocio (no barbería-hardcoded)** ⭐ — el loyalty/citas debe servir a cualquier negocio de servicios (barbería, uñas, masajes, clínica, gimnasio…), como `PROJECT_SPEC.md` ("Loyalify"). Quitar datos duros de barbería en `materializer.ts` (seed de services "Corte/Manicure/Masaje", staff "Barbero senior/junior", `T.staff` "Staff / barberos", bot) y `llm.ts` (`richSections` "empleado/barbero"). Seed neutro o vacío con onboarding del dueño. Ver `PATRON_DE_DISENO.md` §3 regla 5.
+3. **Etapa 2.4 — Componentes premium anti-IA** (empty states ilustrados con icono+CTA, estados de error/éxito bonitos, tablas con sticky header)
+4. **Etapa 2.5 — Responsive + accesibilidad** (WCAG AA, focus visible, targets ≥44px, verificación móvil/tablet/desktop)
+5. **Etapa 5.1 — Yape/transferencia real** (`MockPaymentProvider` → QR + datos bancarios + `pending → paid`) — primer cobro de verdad
+6. **Etapa 1.1 — CI** (mover `smoke-monetization.mjs` a suite automatizada en cada push)
+7. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).

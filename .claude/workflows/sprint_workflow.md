@@ -66,6 +66,24 @@ This workflow is triggered by:
 - Tests meet coverage requirements
 - Documentation is updated
 
+### Stage 2.5: Slice Review (adversarial architecture) — architecture_reviewer
+**Purpose:** Treat each delivered slice as a "cutre borrador" and force an evidence-based decision between **refactor** and **hardening** before proceeding. This is the post-implementation step where the architect (in hypothesis mode) and the architecture_reviewer (in evidence mode) argue over whether the work is a solid foundation.
+
+**Steps:**
+1. Break the work into **slices** (checkpoints) with acceptance criteria.
+2. Implement a slice, then run the adversarial review (architect hypotheses → reviewer tests against code).
+3. Converge on REFACTOR or HARDENING; run the fix loop (max 2 attempts per finding).
+4. Annotate anything unresolved after 2 attempts as PENDING; move to the next slice.
+5. After the last slice, run the **wildcard slice**: review everything vs all PENDING findings (up to 10 review→fix iterations).
+
+**Responsible Agents:** chief_engineer (hypothesis mode) + architecture_reviewer (evidence mode); fixer = owning specialist.
+
+**Outputs:** per-slice verdict, resolved findings, final PENDING backlog (recorded in `tech_debt.md`).
+
+**Success Criteria:** every slice reviewed before the next began; no finding silently dropped; refactors justified by evidence with a concrete replacement shape.
+
+**Reference:** see [slice_review_workflow.md](slice_review_workflow.md).
+
 ### Stage 3: Progress Monitoring (project_orchestrator)
 **Purpose:** Track progress, resolve blockers, and adjust plan as needed.
 
@@ -180,7 +198,9 @@ This workflow is triggered by:
 ```mermaid
 graph TD
     A[Sprint Planning<br/>project_orchestrator] --> B[Task Execution<br/>Specialist Agents]
-    B --> C[Progress Monitoring<br/>project_orchestrator]
+    B --> B2[Slice Review<br/>architect + architecture_reviewer]
+    B2 -->|hardening| C[Progress Monitoring<br/>project_orchestrator]
+    B2 -->|refactor| B
     C --> B
     C --> D[Quality Gate Execution<br/>code_reviewer]
     D -->|Pass| E[Sprint Completion<br/>project_orchestrator]
@@ -190,6 +210,7 @@ graph TD
     
     style A fill:#e1f5ff
     style B fill:#fff4e1
+    style B2 fill:#fdf3d9
     style C fill:#e1f5ff
     style D fill:#ffe1e1
     style E fill:#e1ffe1
