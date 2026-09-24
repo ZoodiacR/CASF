@@ -147,6 +147,27 @@ Each lesson entry should include:
 - **Context:** El usuario pidió que **todas** las apps generadas tengan arquitectura limpia full-stack, y reportó que solo una era correcta. La causa eran tres puntos que codificaban la heurística frágil: `isAmbitious` en el mock (`llm.ts`), la regla 1 del `SYSTEM_PROMPT` (LLM real), y el default estático en `parseProjectMd`.
 - **Action:** Reemplazar la heurística por un **invariante declarativo**: *data model ⇒ full-stack*. (1) En el mock, `hasData = entities.length > 0` decide el stack. (2) En el `SYSTEM_PROMPT`, la regla dice "full-stack por defecto; estático solo para páginas sin data model". (3) En `parseProjectMd`, un paso de **normalización post-parseo** fuerza full-stack si hay data model aunque el LLM devolviera "None". (4) "Sin login" **ya no degrada a estático**: auth=false significa API pública (sin muro de login), no sin backend — el `guard` del CRUD generado y el `boot()` del runtime lo respetan. (5) Testear el **invariante** (todos los dominios con data model ⇒ backend), no la heurística.
 
+### LL-020: Un build LLM monolítico se pasa del timeout — hay que "slicear" y reanudar por checkpoint
+- **Date:** 2026-09-24
+- **Lesson:** Pedirle a Claude Code (`claude -p`) que implemente la app COMPLETA (backend + frontend + docker + README) en una sola llamada se pasa del timeout (10 min) y muere justo cuando el frontend (la parte más grande) está a medias. La solución no es subir el timeout, sino **partir el build en slices** (backend → frontend → root) y darle a cada slice su propio `claude -p` + timeout. Además, un timeout **parcial** no debe descartar el trabajo ya escrito en disco: si el agente escribió los archivos pero no confirmó (`SLICE_OK`), el slice cuenta como completo si sus archivos están en disco (fallback), y se continúa con el siguiente.
+- **Category:** Architecture
+- **Context:** Implementando "Build LLM-driven" (que Claude Code, no el materializador determinista, genere el código) para VetSalud. El primer run monolítico reventó a los 10 min; el frontend quedó a medias.
+- **Action:** (1) Dividir el build en slices atómicos con `files` objetivo por slice. (2) `runClaude` por slice con `try/catch`: un timeout no aborta el bucle completo. (3) `sliceComplete` usa **dos** fuentes: `memory.md` (`[x]`) y, como fallback, la presencia de los archivos en disco. (4) Un `memory.md` dentro del proyecto generado es el checkpoint: lo lee y actualiza el agente (mismo patrón que `progress.md` del framework), y el engine solo omite slices ya hechos. (5) Nunca `rmSync` el output al reanudar: el resume conserva lo ya generado y solo completa lo que falta.
+
+### LL-021: El seed de una app de demo debe ser idempotente — nunca duplicar datos al rearrancar
+- **Date:** 2026-09-24
+- **Lesson:** Al levantar el backend generado para la demo, la BD reportó `clinics: 2` aunque solo había una clínica lógica. La causa: el seed se había ejecutado más de una vez (una vez por el propio Claude Code al verificar el build, y otra al rearrancar manualmente). Un seed no idempotente duplica datos demo y ensucia la experiencia de demo.
+- **Category:** Technical
+- **Context:** Levantando el backend de VetSalud (`backend/src/server.js`) para ver la demo completa con datos reales; el `/health/ready` devolvió `clinics: 2`.
+- **Action:** (1) El seed de apps generadas **ya** usa `seedIfEmpty()` (solo siembra si la BD está vacía), que es correcto — el problema fue que la BD existente de la verificación del slice root no se limpió antes del arranque de demo. (2) El flujo de demo debe **resetear la BD demo** (`npm run reset` o borrar `data.db`) antes de arrancar, o (3) distinguir claramente "build/verificación" de "demo" para no arrastrar estado. (4) Documentar las credenciales demo que el seed imprime en el log (`admin@vetsalud.pe / VetSalud2026!`).
+
+### LL-022: Capturar tokens reales exige `stream-json` + `--verbose`, no estimar chars
+- **Date:** 2026-09-24
+- **Lesson:** Claude Code con endpoint custom (DeepSeek) no reporta usage por defecto; la estimación `≈4 chars/token` es grosera y, peor, el build LLM-driven **no registraba nada** en el ledger (el Dashboard solo mostraba el spec). Con `--output-format stream-json` se puede streamear el texto al log en vivo Y capturar `usage.input_tokens`/`output_tokens` reales del evento `result`. Pero `stream-json` **requiere `--verbose`** (`Error: When using --print, --output-format=stream-json requires --verbose`).
+- **Category:** Technical
+- **Context:** Añadiendo contabilidad real de tokens/costos al build LLM-driven; el primer intento sin `--verbose` falló con exit code 1.
+- **Action:** (1) Invocar `claude -p --output-format stream-json --verbose`. (2) Parsear por líneas: evento `assistant` (content + usage incremental) y evento `result` (texto final + usage autoritativo). (3) Acumular el usage por slice y escribirlo en `memory.md` para que un resume conserve el conteo. (4) Registrar cada build en el ledger (`addEntry`) con `costOf(model, usage)` para que el Dashboard refleje el gasto real.
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

@@ -37,6 +37,26 @@
 
 ---
 
+## 📅 Bitácora de sesiones
+
+> Registro de qué se hizo cada día y por dónde retomar. Lo más reciente arriba.
+
+### 2026-09-24 — Studio conectado al framework real (Claude Code + DeepSeek) 🔌
+- **Objetivo:** dejar de generar "apps de cartón" (materializador determinista) y conectar CASF Studio al **harness real de Claude Code**, usando **DeepSeek** como LLM.
+- **Hecho:**
+  - `claudeCodeProvider.ts`: invoca `claude -p` dentro de `d:/Trabajo/proyectos/CASF`, con DeepSeek vía `ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic`. Carga `CLAUDE.md`, `.claude/agents/*.md` y `PROJECT_SPEC.md` (benchmark) → specs de nivel "DentaFlow"/"MesaDirecta".
+  - **Pestaña "Log en vivo"** en Studio (`LiveLog.tsx` + `GET /api/live-log`): streaming incremental (offset) del `studio-live.log`, visible en la UI **y** en la terminal con `tail -f`.
+  - **Persistencia del proceso del chat** (`memory.ts` `saveSession`/`getSession` + `GET /api/session`): al recargar se restauran prompt + spec + pasos de progreso + build. Ya no se pierde el flujo.
+  - **Hitos en el log** (`liveLog.ts` `liveMarker`/`appendLive`): `▶ Generando spec… / ✔ Spec generado / ▶ Build iniciado / ✔ Build completado`.
+  - `CLAUDE.md` modularizado (`.claude/constitution/engineering.md` + `process.md`) para sortear el límite de 40k de Claude Code.
+  - `JWT_SECRET` estable en `backend/.env` (ya no invalida sesiones al reiniciar).
+- **Pendiente para mañana (retomar aquí):**
+  1. **Build LLM-driven** — que Claude Code implemente el **código** de la app (no solo el spec), con `--permission-mode acceptEdits`/`bypassPermissions` y `--add-dir` para el output. Es la pieza que falta para que Studio cree apps completas de verdad.
+  2. Probar end-to-end: prompt → spec (DeepSeek/Claude Code) → **build por Claude Code** → preview, todo visible en "Log en vivo" + terminal + chat restaurado.
+  3. Seguir con Etapa 2 (visual) / 5.1 (Yape) según presupuesto.
+
+---
+
 ## Etapa 1 — Cerrar deuda técnica (fundación)
 
 **Por qué:** no tiene sentido "embellecer" un monolito. Hay dos brechas que arrastramos:

@@ -127,6 +127,12 @@ Each decision entry should include:
 - **Rationale:** Un solo review al final no atrapa ni un spec fino ni una implementación superficial. La fricción temprana (rúbrica del spec) evita builds genéricos; la fricción post-implementación (adversarial + slices) evita dar por "hecho" código que no aguanta el escrutinio. El límite de 2 intentos por hallazgo evita loops infinitos; el slice comodín evita que los pendientes se mueran silenciosamente.
 - **Impact:** Nuevos agentes `architecture_reviewer` y `spec_quality_reviewer`; template `spec_quality_rubric.md`; workflow `slice_review_workflow.md`; `chief_engineer.md` (modo hipótesis); `sprint_workflow.md` (Stage 2.5); `CLAUDE.md` (cap. 26 + apéndice); `ETAPAS_SIGUIENTES.md` (Etapa 9). Pendiente: cablear el gate de calidad del spec como endpoint real en CASF Studio.
 
+### 2026-09-24: Build LLM-driven por slices con resume (memory.md) + tokens reales
+- **Decision:** El build de una app (cuando el proveedor es `claude-code`) deja de ser una sola llamada monolítica y pasa a **slices secuenciales** (`backend` → `frontend` → `root`), cada uno con su propio `claude -p --output-format stream-json --verbose` y timeout. El resume se apoya en un **`memory.md`** dentro del proyecto generado (escrito y leído por el agente): un slice con `[x]` — o con todos sus archivos en disco (fallback ante timeout parcial) — se omite. El uso de tokens se captura real (evento `result` del stream-json) y se acumula en el ledger y en `memory.md`.
+- **Category:** Architecture
+- **Rationale:** Un `claude -p` monolítico se pasa del timeout (10 min) y muere a mitad del frontend; dividir en slices acota el alcance de cada llamada y hace el proceso reanudable (no "empezar de cero" tras un fallo, que es desperdicio puro de tokens). Capturar el usage real (no `≈4 chars/token`) hace creíble la contabilidad de costos del producto.
+- **Impact:** `llmBuild.ts` (slices + `runClaude` stream-json + `sliceComplete`/`markSliceDone` + acumulación), `claudeCodeProvider.ts` (stream-json para el spec), `index.ts` (`/api/build` registra tokens+costo en el ledger), `types.ts` (`BuildResult.usage`/`sliceUsage`). El materializador determinista sigue como fallback (`provider !== claude-code`).
+
 ---
 
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->
