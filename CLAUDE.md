@@ -388,7 +388,7 @@ This chapter defines the quality loop that runs **after implementation**. It pre
 
 6. **When a fixer fails the same problem repeatedly**, the reviewer proposes a **refactor as the fix** instead of a third cosmetic patch.
 
-7. **Specs are scored before build.** The `spec_quality_reviewer` scores every generated spec against [spec_quality_rubric.md](.claude/templates/spec_quality_rubric.md) (benchmark: `PROJECT_SPEC.md`). A red-line failure (no data model, no architecture, no auth for money-handling apps, wrong stack) blocks the build regardless of score.
+7. **Specs are scored before build.** The `spec_quality_reviewer` scores every generated spec against [spec_quality_rubric.md](.claude/templates/spec_quality_rubric.md) (benchmark: `.claude/examples/PROJECT_SPEC.md`). A red-line failure (no data model, no architecture, no auth for money-handling apps, wrong stack) blocks the build regardless of score.
 
 ### Examples
 **Good:**
@@ -406,7 +406,7 @@ This chapter defines the quality loop that runs **after implementation**. It pre
 - [agents/architecture_reviewer.md](.claude/agents/architecture_reviewer.md) — the evidence-mode reviewer
 - [agents/spec_quality_reviewer.md](.claude/agents/spec_quality_reviewer.md) — the spec quality gate
 - [templates/spec_quality_rubric.md](.claude/templates/spec_quality_rubric.md) — the 12-dimension scoring rubric
-- `PROJECT_SPEC.md` — the benchmark rich spec (quality bar)
+- `.claude/examples/PROJECT_SPEC.md` — the benchmark rich spec (quality bar)
 
 ---
 
@@ -449,7 +449,7 @@ This chapter defines the quality loop that runs **after implementation**. It pre
 - **pr_description:** Pull request description
 - **post_mortem:** Incident post-mortem
 - **spec_template:** Project/feature specification
-- **spec_quality_rubric:** 12-dimension scoring rubric for generated specs (benchmark: PROJECT_SPEC.md)
+- **spec_quality_rubric:** 12-dimension scoring rubric for generated specs (benchmark: .claude/examples/PROJECT_SPEC.md)
 
 ---
 

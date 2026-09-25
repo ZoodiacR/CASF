@@ -1,7 +1,7 @@
 # Template: spec_quality_rubric
 
 ## Purpose
-This rubric measures the **quality of a generated `project.md` / ProjectSpec**. It is the metric the `spec_quality_reviewer` agent uses to decide whether a spec is "rico" (rich, complete, buildable) or thin. The benchmark is the 61-section spec in `PROJECT_SPEC.md` (Loyalify) — the *quality bar*, not a literal checklist to copy.
+This rubric measures the **quality of a generated `project.md` / ProjectSpec**. It is the metric the `spec_quality_reviewer` agent uses to decide whether a spec is "rico" (rich, complete, buildable) or thin. The benchmark is the 61-section spec in `.claude/examples/PROJECT_SPEC.md` (Loyalify) — the *quality bar*, not a literal checklist to copy.
 
 A spec that scores high here should let a reviewer scaffold the whole app (folders, entities, endpoints, states, security, delivery) **without guessing**.
 

@@ -178,12 +178,17 @@ your-project/
 │   │   ├── lessons_learned.md
 │   │   ├── tech_debt.md
 │   │   └── token_ledger.md
-│   └── logs/                        # Session logs (optional)
+│   ├── logs/                        # Session logs (optional)
+│   ├── DESIGN_SYSTEM.md             # Visual language for generated apps
+│   ├── DESIGN_SYSTEM.en.md
+│   ├── PATRON_DE_DISENO.md          # Architecture blueprint
+│   └── examples/
+│       └── PROJECT_SPEC.md          # Rich spec benchmark (Loyalify)
 ├── sprints/                         # Sprint plans (created as you go)
 ├── docs/
 │   ├── adr/                         # Architecture Decision Records
-│   └── sprint/                      # Sprint plans (sprint_1_plan.md, …)
-├── PATRON_DE_DISENO.md              # Design pattern / architecture blueprint
+│   ├── sprint/                      # Sprint plans (sprint_1_plan.md, …)
+│   └── GITHUB_GUIDE.md              # How the repos were published
 ├── VENTAJAS_COMPETITIVAS.md         # Business & competitive-advantage doc
 └── post-mortems/                    # Incident reports
 ```

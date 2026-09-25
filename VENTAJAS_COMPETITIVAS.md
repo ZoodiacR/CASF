@@ -128,8 +128,6 @@ Gratis: idea → spec (demo, 1–2/mes)
 
 **Palanca de crecimiento:** la combinación "memoria + costos + spec" es naturalmente **viral en equipos** (el framework se comparte como repo, como Rails o un monorepo de reglas).
 
-Números operativos (costos, MRR mínimo, escenarios bueno/regular/malo/crítico y contingencias): ver `ETAPAS_SIGUIENTES.md` secciones **💰**, **📈** y **Apéndice B**. Este archivo no sustituye esa hoja: aquí está el *por qué* de negocio; allí está *cuánta plata hace falta para no fundirse*.
-
 ---
 
 ## 6. Roadmap hacia empresa

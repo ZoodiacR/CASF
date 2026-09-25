@@ -85,7 +85,7 @@ No propongas rewrite sin nombrar la forma de reemplazo.
 | `architecture_reviewer` (evidencia) | subagente `architecture_reviewer` | `generalPurpose` | **Review adversarial post-implementación** (lee código, no resumen) |
 | `spec_quality_reviewer` | subagente `spec_quality_reviewer` | `generalPurpose` | **Gate de calidad del spec** antes del build |
 | `backend_architect` / `database_architect` | subagente homónimo | `generalPurpose` | Diseño de API/schema antes de implementar |
-| `frontend_architect` | subagente `frontend_architect` | `generalPurpose` | Diseño de UI/componentes (sigue `DESIGN_SYSTEM.md`) |
+| `frontend_architect` | subagente `frontend_architect` | `generalPurpose` | Diseño de UI/componentes (sigue `.claude/DESIGN_SYSTEM.md`) |
 | `qa_engineer` | subagente `qa_engineer` | `generalPurpose` | Estrategia de tests, planes de cobertura |
 | `code_reviewer` | subagente `code_reviewer` | `bugbot` | **Gate pre-merge** del diff |
 | `security_officer` | subagente `security_officer` | `security-review` | **Revisión de seguridad** del diff (secretos, OWASP) |
@@ -104,7 +104,7 @@ No propongas rewrite sin nombrar la forma de reemplazo.
 ```
 GENERACIÓN ──► [spec_quality_reviewer]
                  · compara el spec contra spec_quality_rubric.md
-                 · benchmark = PROJECT_SPEC.md
+                 · benchmark = .claude/examples/PROJECT_SPEC.md
                  · salida: score (0-100) + red-lines + top gaps + verdict
                  · red-line = BLOQUEA el build
 

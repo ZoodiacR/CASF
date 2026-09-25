@@ -8,6 +8,12 @@
 Thumbs.db
 *.log
 
+# --- Local launchers and personal runbook (machine paths; not part of the framework) ---
+*.bat
+claude-deepseek.sh
+setup-claude-deepseek.mjs
+GUIA_MANUAL.md
+
 # --- Agent session data ---
 .claude/logs/*
 !.claude/logs/.gitkeep
