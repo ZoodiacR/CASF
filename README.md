@@ -171,7 +171,8 @@ your-project/
 │   │   ├── post_mortem.md
 │   │   └── spec_template.md
 │   ├── prompts/                     # Ready-to-use prompt library
-│   │   └── README.md
+│   │   └── catalog.md
+│   ├── CLAUDE.en.md                 # English constitution (not auto-loaded)
 │   ├── memory/                      # Persistent context
 │   │   ├── progress.md              # live checkpoint (resume)
 │   │   ├── decisions.md
@@ -188,8 +189,8 @@ your-project/
 ├── docs/
 │   ├── adr/                         # Architecture Decision Records
 │   ├── sprint/                      # Sprint plans (sprint_1_plan.md, …)
-│   └── GITHUB_GUIDE.md              # How the repos were published
-├── VENTAJAS_COMPETITIVAS.md         # Business & competitive-advantage doc
+│   ├── GITHUB_GUIDE.md              # How the repos were published
+│   └── VENTAJAS_COMPETITIVAS.md     # Business & competitive-advantage doc
 └── post-mortems/                    # Incident reports
 ```
 
@@ -352,7 +353,7 @@ Choose based on your comfort level:
 
 ## 📚 Prompt Library
 
-All prompts below are ready to copy-paste. Store them in `Prompt Catalog.md` for quick access.
+All prompts below are ready to copy-paste. The full set lives in `.claude/prompts/catalog.md`.
 
 ---
 

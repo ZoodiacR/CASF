@@ -8,8 +8,8 @@ WORKDIR /casf
 # The framework is pure Markdown/config — copy everything relevant.
 COPY .claude ./claude
 COPY CLAUDE.md ./CLAUDE.md
-COPY VENTAJAS_COMPETITIVAS.md ./VENTAJAS_COMPETITIVAS.md
-COPY PATRON_DE_DISENO.md ./PATRON_DE_DISENO.md
+COPY docs/VENTAJAS_COMPETITIVAS.md ./VENTAJAS_COMPETITIVAS.md
+COPY .claude/PATRON_DE_DISENO.md ./PATRON_DE_DISENO.md
 COPY README.md ./README.md
 
 # Mark the volume so host agents can mount it read-only/read-write.

@@ -477,8 +477,8 @@ This is how your framework gets **smarter over time**.
 
 ## 📎 Related Files
 
-- `README.md` — Full framework documentation.
-- `CLAUDE.md` — Master configuration (rules the AI follows).
+- `../../README.md` — Full framework documentation.
+- `../../CLAUDE.md` — Master configuration (rules the AI follows).
 - `project_spec.md` — What you're building.
 - `.claude/agents/project_orchestrator.md` — Definition of the entry-point agent.
 - `.claude/commands/` — Slash commands referenced by the prompts.

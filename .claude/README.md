@@ -10,5 +10,7 @@ Structure:
 - examples\   -> PROJECT_SPEC.md, the rich-spec benchmark
 - DESIGN_SYSTEM.md / DESIGN_SYSTEM.en.md -> visual language for generated apps
 - PATRON_DE_DISENO.md -> architecture blueprint
+- prompts\     -> catalog.md, the ready-to-use prompt library
+- CLAUDE.en.md -> English constitution (not auto-loaded; CLAUDE.md at the repo root is)
 
 This is CASF v1.0 — the product (no longer beta). The bootstrap stubs have been materialized.

@@ -113,7 +113,7 @@ Each decision entry should include:
 - **Decision:** Bajar Free a **spec demo (0 builds)**. Usar el producto = **crédito (~$4 / S/15 por build)** o **suscripción Pro $19 / Enterprise $99**. Packs 3×$10 y 10×$29. Ads en Free dejan de ser el plan A.
 - **Category:** Product
 - **Rationale:** Un Free que regala apps come COGS. $19 asusta a quien quiere una sola app; el crédito es el precio Yape-amigable. El crédito es más caro por unidad que Pro (~5 builds = $20) para no canibalizar el mensual.
-- **Impact:** Solo documentación: `ETAPAS_SIGUIENTES.md` (5.4–5.5) y `VENTAJAS_COMPETITIVAS.md` §4. Código se cablea en el sprint de cobro.
+- **Impact:** Solo documentación: `docs/VENTAJAS_COMPETITIVAS.md` §4. Código se cablea en el sprint de cobro.
 
 ### 2026-09-22: Cableado del cobro (créditos + 402 + límites) — código
 - **Decision:** Implementar en código el modelo "Free demo + créditos + Pro": Free construye 0 apps (2 specs/mes), el build se paga con 1 crédito (packs 1×$4, 3×$10, 10×$29) o Pro/Enterprise (cupo 50/∞ builds/mes). Gate **server-side** en `/api/build` (`402 PAYMENT_REQUIRED` sin créditos) y en `/api/spec/generate` (límite de specs). Cobro solo al éxito del build.

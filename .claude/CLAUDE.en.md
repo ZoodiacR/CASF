@@ -1,6 +1,6 @@
 # CLAUDE.md — CASF Framework Constitution
 
-> 🇪🇸 [Lee esta documentación en español](CLAUDE.md)
+> 🇪🇸 [Lee esta documentación en español](../CLAUDE.md)
 
 ## Table of Contents
 1. [Identity](#1-identity)

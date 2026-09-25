@@ -13,6 +13,7 @@ Thumbs.db
 claude-deepseek.sh
 setup-claude-deepseek.mjs
 GUIA_MANUAL.md
+docs/GUIA_MANUAL.md
 
 # --- Agent session data ---
 .claude/logs/*

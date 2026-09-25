@@ -1,5 +1,7 @@
 # CLAUDE.md — CASF Framework Constitution
 
+> English (not loaded automatically): [.claude/CLAUDE.en.md](.claude/CLAUDE.en.md)
+
 ## Table of Contents
 1. [Identity](#1-identity)
 2. [Core Principles](#2-core-principles)
