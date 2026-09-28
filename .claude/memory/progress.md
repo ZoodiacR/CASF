@@ -124,15 +124,27 @@
 - **Bugs confirmados:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). Claude Code entra en bucles de reintento contra este endpoint.
 - **Decisión derivada:** arquitectura híbrida — Claude Code para el trabajo agéntico, API nativa de DeepSeek para la generación masiva con prefijo estático grande (~33× de ahorro medido en el input).
 
+## ✅ Materialización de subagentes (2026-09-28)
+
+Hallazgo del usuario: *«los agents van afuera y simplemente usa los comandos para llamarlos?»* → destapó que los comandos usaban los agentes como **prosa**, no como invocaciones.
+
+- **0 menciones** de `subagent`/`spawn`/`Task`/`materializ` en los 7 comandos: era role-play del modelo principal.
+- Los comandos y los subagentes son mecanismos **independientes**: comandos = los invoca el usuario; agentes = los invoca el modelo vía `Task`.
+- `new-sprint` ni siquiera mencionaba `spec_quality_reviewer` ni `architecture_reviewer` (el corazón del cap. 26).
+- **Arreglado:** tabla explícita de materialización en los 5 comandos que delegan; `status` y `resume` declaran inline por diseño.
+- **`--plugin-dir`:** el framework ahora se autocarga como plugin de sesión. Verificado **sin instalación global y desde otro cwd** → Skills (8), Agents (14). Quien clone los repos no instala nada.
+- **73 rutas** a `.claude/agents/` corregidas (2 históricas preservadas a propósito).
+
 ## 📁 Files currently being edited
-- `CASF/docs/PLAN_CACHE_Y_PLUGIN.md` (§2b con las mediciones · §5 con hallazgos abiertos)
-- `CASF/.claude/memory/lessons_learned.md` (LL-025) + `decisions.md` (ruta híbrida)
-- `casf-studio/backend/src/usage.ts` (normalizador de usage) + `cost.ts` + `ledger.ts`
+- `CASF/.claude/commands/*.md` (7 comandos con sección de delegación explícita)
+- `CASF/.claude/memory/{lessons_learned,decisions}.md` (LL-026 + decisión)
+- `casf-studio/backend/src/claudeCodeProvider.ts` (`--plugin-dir`)
 
 ## 🎯 Próximos pasos
-1. **`CLAUDE_CONFIG_DIR` propio** en `claudeCodeProvider.ts` para que el `settings.json` del usuario no contamine los builds.
+1. **`CLAUDE_CONFIG_DIR` propio** en `claudeCodeProvider.ts` para que el `settings.json` del usuario no pise el entorno (hoy fuerza el modelo legacy `deepseek-chat` y 64k de contexto).
 2. **Acotar `maxRetries`/timeout** en el provider (hoy puede quedarse en bucle quemando cuota).
-3. **Capa directa a la API nativa de DeepSeek** para las etapas de generación masiva (captura el caché medido).
-4. **Reportar a Anthropic**: el campo `agents` del manifest se valida pero no se carga; y el override silencioso de `settings.json` sobre el entorno del proceso.
-5. **Enviar al marketplace curado** `anthropics/claude-plugins-community` (el plugin ya es instalable desde GitHub).
+3. **Capa directa a la API nativa de DeepSeek** para la generación masiva (captura el caché medido, ~33×).
+4. **Probar el flujo completo** con los subagentes materializándose de verdad, y verificar en el log en vivo que dice «plugin CASF cargado».
+5. **Reportar a Anthropic**: el campo `agents` del manifest se valida pero no se carga; y el override silencioso de `settings.json` sobre el entorno del proceso.
+6. **Enviar al marketplace curado** `anthropics/claude-plugins-community` (el plugin ya es instalable desde GitHub).
 
