@@ -121,7 +121,9 @@
 - El caché **sí funciona**: API nativa de DeepSeek **98.9 %**, shim `/anthropic` **99.5 %**, disponible a los **+3 s**.
 - Se descartaron **todas** las variables de transporte (query `?beta=true`, header `anthropic-beta` completo de 8 valores, `Bearer` vs `x-api-key`, user-agent, session-id): todas 99.5 %.
 - El **mismo cuerpo byte a byte** reenviado por nosotros → **99.5 %**; enviado por Claude Code → **0 %**, y el upstream confirma que devolvió 0. **Causa raíz no aislada → hallazgo abierto**, no conclusión.
-- **Bugs confirmados:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). Claude Code entra en bucles de reintento contra este endpoint.
+- **Bugs confirmados:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). **Arreglado** con `--settings`, que sí tiene precedencia y además merge.
+- **Retirado:** el «bucle de reintentos» NO era de Claude Code: solo aparecía al enrutar por mi proxy instrumentado. Directo, 8+ corridas sin un reintento.
+- **Hipótesis refutada:** el caché NO está namespaceado por credencial. Bearer cachea igual (98.5%) y el caché se comparte entre `Bearer` y `x-api-key`. (Mi prueba anterior de Bearer era inválida: reenviaba la variable equivocada.)
 - **Decisión derivada:** arquitectura híbrida — Claude Code para el trabajo agéntico, API nativa de DeepSeek para la generación masiva con prefijo estático grande (~33× de ahorro medido en el input).
 
 ## ✅ Materialización de subagentes (2026-09-28)

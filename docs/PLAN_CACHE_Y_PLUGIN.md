@@ -165,7 +165,22 @@ en la ruta de transporte Claude Code → DeepSeek y **no** en el prompt, el prot
 framework. No se pudo aislar la causa raíz exacta dentro del presupuesto de la prueba; queda
 registrado como hallazgo abierto, no como conclusión.
 
-### 2b.2 Dos bugs confirmados de camino
+**Matices y correcciones de la propia medición** (para no sobreafirmar):
+
+- **Una anomalía sin explicar:** una corrida de Claude Code reportó `cache_read = 37 248`. Las 5
+  corridas de control posteriores, con args idénticos, dieron 0. La formulación correcta es «el CLI
+  **casi siempre** reporta 0 y **a veces** acierta», no «nunca acierta». Queda como pista abierta.
+- **Hipótesis refutada — caché por credencial:** se pensó que el shim namespaceaba el caché por
+  cabecera de auth (mis replays usaban `x-api-key`, Claude Code usa `Bearer`). Con prefijo nuevo y
+  un nonce por prueba: **Bearer acierta igual (98.5 %)** y el caché se comparte entre ambas
+  credenciales. La sospecha estaba contaminada por un error del propio script, que reenviaba el
+  prefijo ya cacheado.
+- **Corrección de instrumentación:** lo que al principio conté como «2 llamadas API por corrida» son
+  **los dos eventos de stream de la misma petición** (mismo `message.id`: uno con el bloque de
+  *thinking* y otro con el texto). Claude Code hace **una** petición por corrida.
+- **El «bucle de reintentos» era artefacto del proxy** (ver §2b.2): se retira como bug.
+
+### 2b.2 Bugs, correcciones y estado
 
 1. **`~/.claude/settings.json` pisa las variables que exporta CASF Studio.** El bloque `env` del
    archivo de usuario gana sobre el entorno del proceso hijo. En esta máquina eso significa:
@@ -174,12 +189,16 @@ registrado como hallazgo abierto, no como conclusión.
    - `CLAUDE_CODE_MAX_CONTEXT_TOKENS: "64000"` → pisa los 200 000 que declara `claudeCodeProvider.ts`.
 
    Se detectó porque `ANTHROPIC_BASE_URL` fue ignorado y las peticiones no pasaban por el proxy.
-   **Mitigación:** lanzar con `CLAUDE_CONFIG_DIR` apuntando a un directorio propio, o documentar que
-   el usuario debe limpiar su `settings.json`.
+   **Arreglado** con `--settings`, que tiene precedencia sobre la config del usuario y además hace
+   *merge* (no descarta el resto). Verificado con los args exactos del provider:
+   `model=deepseek-flash`, `contextWindow=200000`. Es mejor que `CLAUDE_CONFIG_DIR` porque no
+   secuestra el resto de la configuración del usuario.
 
-2. **Claude Code entra en bucles de reintento** contra este endpoint (se observaron 12+ reintentos
-   consecutivos con respuesta vacía). Consume cuota sin producir nada. Hay que acotar
-   `maxRetries`/timeout en el provider.
+2. **CORREGIDO — el «bucle de reintentos» era mi proxy, no Claude Code.** Se observaron 12+ reintentos
+   consecutivos con respuesta vacía, pero **solo al enrutar por el proxy de diagnóstico instrumentado**.
+   Con conexión directa, 8+ corridas terminaron en 3-6 s sin un solo reintento. Por tanto **no es un bug
+   de Claude Code** y la afirmación anterior queda retirada. (Detalle que engañó: el intérprete del proxy
+   recibía respuestas comprimidas y reportaba `usage: null`, que confundí con respuestas vacías.)
 
 ### 2b.3 Decisión que se deriva
 
@@ -301,11 +320,21 @@ Alcanzamos el primero con certeza. El segundo depende de la revisión de Anthrop
 
 - **Causa raíz del cache miss en la ruta Claude Code → DeepSeek.** Aislada pero no identificada:
   cuerpo/headers/ruta idénticos aciertan cuando los enviamos nosotros y fallan cuando los envía el CLI.
-  Siguiente experimento sugerido: comparar la petición a nivel de socket (HTTP/1.1 vs chunked, orden de
-  headers) o consultar el detalle de facturación de DeepSeek para ver si el caché **sí** se aplica y
-  solo **no se reporta** por esa ruta.
-- **Reportar el bug** del campo `agents` del manifest a Anthropic (`anthropics/claude-code`), con el
-  experimento de dos plugins como reproducción mínima.
-- **Reportar el override silencioso** de `~/.claude/settings.json` sobre el entorno del proceso.
+  **Descartado con evidencia:** prefijo inestable, protocolo, ruta con `?beta=true`, header
+  `anthropic-beta` completo, credencial (`Bearer` vs `x-api-key`), user-agent, session-id, latencia de
+  calentamiento y streaming. Queda **una vía directa** y **una de bypass**:
+  - **Directa:** comparar la petición a nivel de socket (HTTP/1.1 vs HTTP/2, chunked vs
+    `content-length`, orden de headers, compresión del cuerpo) o —más barato— mirar el **panel de
+    facturación de DeepSeek**: si ahí aparecen aciertos, el caché **sí** se aplica y solo **no se
+    reporta** por esa ruta, lo que cierra el bug como artefacto de reporte.
+  - **Bypass:** usar la API nativa para la generación masiva (98.9 % medido). Ver §2b.3.
+- **Reportar a Anthropic:**
+  - El campo `agents` del manifest se valida pero el loader no lo honra (reproducción mínima: dos
+    plugins idénticos salvo la ubicación de los agentes).
+  - El bloque `env` de `~/.claude/settings.json` pisa el entorno del proceso hijo — silenciosamente,
+    sin advertencia. Mitigable con `--settings`, que sí tiene precedencia.
+- **`--plugin-dir` como hallazgo aprovechable:** carga el plugin solo para esa sesión. Verificado desde
+  otro cwd y sin instalación global → Skills (8), Agents (14). Es lo que hace que el framework sea
+  autocontenido: quien clone el repo no necesita instalar el plugin a mano.
 - **Publicación en el marketplace curado** de Anthropic: el plugin ya es instalable desde GitHub; para
   el catálogo oficial hay que enviarlo a `anthropics/claude-plugins-community` y pasar su revisión.
