@@ -141,6 +141,62 @@ empírica de que el prefijo es inestable → ahí sí tocaría estabilizarlo (no
 
 ---
 
+## 2b. Fase 4 — Validación empírica del caché (el resultado contradice el plan)
+
+Se ejecutó la prueba con la API real. **La hipótesis del prefijo inestable quedó refutada**, y el
+resultado real es más incómodo y más importante.
+
+### 2b.1 Lo que se midió
+
+| Experimento | Resultado |
+| --- | --- |
+| Dos corridas idénticas de Claude Code | `input_tokens = 37303` en **ambas** → el prefijo **es byte-estable** |
+| SHA de `tools` / `system` / `messages` capturados por proxy | **Idénticos** entre corridas |
+| API **nativa** de DeepSeek, prefijo idéntico ×2 | **98.9 %** de aciertos ✅ |
+| Shim `/anthropic`, prefijo idéntico ×2 | **99.5 %** de aciertos ✅ |
+| Shim, disponibilidad del caché | Acierta a los **+3 s** (no hay latencia de calentamiento) |
+| Shim, variantes de transporte (query `?beta=true`, `anthropic-beta` completo de 8 valores, `Bearer` vs `x-api-key`, user-agent, session-id) | **Todas 99.5 %** → el transporte no es la causa |
+| **Replay del cuerpo EXACTO de Claude Code, byte a byte** | **99.5 %** ✅ |
+| Claude Code ejecutándose por sí mismo | **0.0 %** ❌, confirmado por el propio upstream |
+
+**Conclusión:** el mismo cuerpo, con los mismos headers, en la misma ruta y con la misma cuenta,
+acierta al 99.5 % cuando lo enviamos nosotros y da 0 % cuando lo envía Claude Code. La pérdida está
+en la ruta de transporte Claude Code → DeepSeek y **no** en el prompt, el protocolo, la cuenta ni el
+framework. No se pudo aislar la causa raíz exacta dentro del presupuesto de la prueba; queda
+registrado como hallazgo abierto, no como conclusión.
+
+### 2b.2 Dos bugs confirmados de camino
+
+1. **`~/.claude/settings.json` pisa las variables que exporta CASF Studio.** El bloque `env` del
+   archivo de usuario gana sobre el entorno del proceso hijo. En esta máquina eso significa:
+   - `ANTHROPIC_MODEL: "deepseek-chat"` → **modelo legacy discontinuado el 2026-07-24**, en lugar del
+     `deepseek-flash` que el provider cree estar usando.
+   - `CLAUDE_CODE_MAX_CONTEXT_TOKENS: "64000"` → pisa los 200 000 que declara `claudeCodeProvider.ts`.
+
+   Se detectó porque `ANTHROPIC_BASE_URL` fue ignorado y las peticiones no pasaban por el proxy.
+   **Mitigación:** lanzar con `CLAUDE_CONFIG_DIR` apuntando a un directorio propio, o documentar que
+   el usuario debe limpiar su `settings.json`.
+
+2. **Claude Code entra en bucles de reintento** contra este endpoint (se observaron 12+ reintentos
+   consecutivos con respuesta vacía). Consume cuota sin producir nada. Hay que acotar
+   `maxRetries`/timeout en el provider.
+
+### 2b.3 Decisión que se deriva
+
+Dado que por la ruta de Claude Code el caché no se materializa, y que el **prefijo estático grande
+(≈33 K tokens) es donde vive el 97 % del costo**, la recomendación es una **arquitectura híbrida**:
+
+| Etapa | Ruta | Motivo |
+| --- | --- | --- |
+| Trabajo agéntico (leer repo, editar, tools) | **Claude Code CLI** | Es el valor real: harness, agentes, tools |
+| Generación masiva de texto (spec, slices, docs) con prefijo estático grande | **API nativa de DeepSeek** | Captura el **~33×** de ahorro del caché, medido |
+
+El normalizador de `usage.ts` ya entiende **ambos** esquemas, así que el ledger contabiliza las dos
+rutas sin cambios. Esto convierte el bug de contabilidad que arreglamos en el habilitador de la
+solución.
+
+---
+
 ## 3. Fase 3 — CASF como plugin oficial de Claude Code (`CASF`)
 
 ### 3.1 Estructura final (validada)
@@ -238,15 +294,18 @@ Alcanzamos el primero con certeza. El segundo depende de la revisión de Anthrop
 | 3. Skill de constitución | ✅ Hecho | `casf-framework` carga ~890 tok on-invoke |
 | 3. Manifest + marketplace | ✅ Hecho | `claude plugin validate .` → passed |
 | 3. Verificación empírica | ✅ Hecho | `plugin details casf` → **Skills (8) · Agents (14)** |
-| 4. Validar hit rate con corrida real | ⏳ Pendiente | Requiere un build real |
-| 5. README de instalación + CHANGELOG | ✅ Hecho | Pendiente de push |
+| 4. Validar hit rate con corrida real | ✅ Hecho | **0 % por la ruta de Claude Code**; 99.5 % por la ruta directa. Ver §2b |
+| 5. README de instalación + CHANGELOG | ✅ Hecho | Pusheado |
 
-### Pendiente con decisión del usuario
+### Hallazgos abiertos
 
-- **Fase 4**: correr un build real para ver si el hit rate de caché es > 0. Si sale 0%,
-  tenemos la prueba de que el prefijo del prompt es inestable y hay que estabilizarlo.
-- **Publicación oficial**: el plugin es instalable desde GitHub ya. Para el marketplace
-  curado de Anthropic hay que enviarlo a `anthropics/claude-plugins-community` y pasar su
-  revisión (no está en nuestras manos).
-- **Reportar el bug** del campo `agents` a Anthropic (`anthropics/claude-code`), con el
+- **Causa raíz del cache miss en la ruta Claude Code → DeepSeek.** Aislada pero no identificada:
+  cuerpo/headers/ruta idénticos aciertan cuando los enviamos nosotros y fallan cuando los envía el CLI.
+  Siguiente experimento sugerido: comparar la petición a nivel de socket (HTTP/1.1 vs chunked, orden de
+  headers) o consultar el detalle de facturación de DeepSeek para ver si el caché **sí** se aplica y
+  solo **no se reporta** por esa ruta.
+- **Reportar el bug** del campo `agents` del manifest a Anthropic (`anthropics/claude-code`), con el
   experimento de dos plugins como reproducción mínima.
+- **Reportar el override silencioso** de `~/.claude/settings.json` sobre el entorno del proceso.
+- **Publicación en el marketplace curado** de Anthropic: el plugin ya es instalable desde GitHub; para
+  el catálogo oficial hay que enviarlo a `anthropics/claude-plugins-community` y pasar su revisión.

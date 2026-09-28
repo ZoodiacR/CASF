@@ -113,13 +113,26 @@
 - Model/API: mock (deepseek-chat), costo real simulado
 - Último costo registrado: ~$0.000161 por generación
 
+## ✅ Fase 4 — Validación del caché (2026-09-28)
+
+**Resultado: la hipótesis del prefijo inestable quedó REFUTADA, y el hallazgo real es otro.**
+
+- El prefijo **es byte-estable**: dos corridas de Claude Code dieron `input_tokens = 37303` idéntico, y el SHA-256 de `tools`/`system`/`messages` capturados por un proxy local coincidió byte a byte.
+- El caché **sí funciona**: API nativa de DeepSeek **98.9 %**, shim `/anthropic` **99.5 %**, disponible a los **+3 s**.
+- Se descartaron **todas** las variables de transporte (query `?beta=true`, header `anthropic-beta` completo de 8 valores, `Bearer` vs `x-api-key`, user-agent, session-id): todas 99.5 %.
+- El **mismo cuerpo byte a byte** reenviado por nosotros → **99.5 %**; enviado por Claude Code → **0 %**, y el upstream confirma que devolvió 0. **Causa raíz no aislada → hallazgo abierto**, no conclusión.
+- **Bugs confirmados:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). Claude Code entra en bucles de reintento contra este endpoint.
+- **Decisión derivada:** arquitectura híbrida — Claude Code para el trabajo agéntico, API nativa de DeepSeek para la generación masiva con prefijo estático grande (~33× de ahorro medido en el input).
+
 ## 📁 Files currently being edited
-- `CASF/.claude-plugin/plugin.json` + `marketplace.json` (manifest y catálogo del plugin)
-- `CASF/agents/*.md` (14 agentes con frontmatter kebab-case, movidos desde `.claude/agents/`)
-- `CASF/.claude/skills/casf-framework/SKILL.md` (la constitución como skill)
-- `CASF/README.md` + `CHANGELOG.md` + `docs/PLAN_CACHE_Y_PLUGIN.md`
-- `casf-studio/backend/src/usage.ts` (nuevo: normalizador de usage) + `cost.ts` + `ledger.ts`
-- `casf-studio/backend/src/claudeCodeProvider.ts` + `llmBuild.ts` + `llm.ts` + `index.ts`
-- `casf-studio/frontend/src/Dashboard.tsx` + `api.ts` + `i18n.ts` (tarjetas de caché)
-- `casf-studio/backend/test/usage.test.ts` (nuevo: 12 tests del normalizador y del costo con caché)
+- `CASF/docs/PLAN_CACHE_Y_PLUGIN.md` (§2b con las mediciones · §5 con hallazgos abiertos)
+- `CASF/.claude/memory/lessons_learned.md` (LL-025) + `decisions.md` (ruta híbrida)
+- `casf-studio/backend/src/usage.ts` (normalizador de usage) + `cost.ts` + `ledger.ts`
+
+## 🎯 Próximos pasos
+1. **`CLAUDE_CONFIG_DIR` propio** en `claudeCodeProvider.ts` para que el `settings.json` del usuario no contamine los builds.
+2. **Acotar `maxRetries`/timeout** en el provider (hoy puede quedarse en bucle quemando cuota).
+3. **Capa directa a la API nativa de DeepSeek** para las etapas de generación masiva (captura el caché medido).
+4. **Reportar a Anthropic**: el campo `agents` del manifest se valida pero no se carga; y el override silencioso de `settings.json` sobre el entorno del proceso.
+5. **Enviar al marketplace curado** `anthropics/claude-plugins-community` (el plugin ya es instalable desde GitHub).
 
