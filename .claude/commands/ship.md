@@ -14,6 +14,27 @@ Executes the release workflow by running quality gates, updating changelog, tagg
 - Rollback plan must be documented and tested
 - Production deployment window must be available (if applicable)
 
+## Delegation — materialize, do not role-play
+
+The roles below are **subagents**, not personas. Materialize them; do not narrate them inline.
+
+- Roles live in `agents/<role>.md` and the framework plugin exposes each as a real subagent. Invoke it with the **`Task` tool**, passing `CONTEXT` + `TASK` + `OUTPUT`. Do **not** paste the `.md` into the prompt — the harness already loads its spec.
+- `project_orchestrator` is **this session**, not a subagent: it coordinates inline and spawns the rest.
+- **A reviewer is never the author.** The agent that produced the release must not be the only one signing it off.
+
+| Role | Spawn? | When |
+|---|---|---|
+| `code_reviewer` + `security_officer` | **Yes, in parallel** | Pre-release gate on the final diff (release-blocking) |
+| `qa_engineer` | **Yes** | Verify coverage and regression suite before tagging |
+| `devops_engineer` | **Yes** | Run the deploy, and own the rollback path |
+| `documentation_writer` | **Yes** | Changelog and release notes |
+| `chief_engineer` | Only to break ties | Escalation on release-blocking conflicts |
+| `project_orchestrator` | No — this session | Verification checklist, coordination, communication |
+
+Run the release-blocking reviews **in parallel**, then gate on both.
+
+See `.claude/DELEGATION_BRIDGE.md` for the full role map and the per-harness adapter.
+
 ## Steps
 
 ### Step 1: Pre-Release Verification (project_orchestrator)

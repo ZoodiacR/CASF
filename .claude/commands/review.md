@@ -12,6 +12,27 @@ Runs a comprehensive code and architecture review across the current changeset. 
 - Quality gate infrastructure must be configured
 - CI/CD pipeline results must be available (if applicable)
 
+## Delegation — materialize, do not role-play
+
+The roles below are **subagents**, not personas. Materialize them; do not narrate them inline.
+
+- Roles live in `agents/<role>.md` and the framework plugin exposes each as a real subagent. Invoke it with the **`Task` tool**, passing `CONTEXT` + `TASK` + `OUTPUT`. Do **not** paste the `.md` into the prompt — the harness already loads its spec.
+- `project_orchestrator` is **this session**, not a subagent: it coordinates inline and spawns the rest.
+- **A reviewer is never the author.** Whoever wrote the changeset must not run its own review. An inline review is not a review.
+
+| Role | Spawn? | When |
+|---|---|---|
+| `code_reviewer` | **Yes** | Primary code review. Run the **integration pass** in a *fresh* context, not the one that produced the findings |
+| `architecture_reviewer` | **Yes** | Adversarial pass: hypotheses (from the design) marked CONFIRMED / REFUTED / UNVERIFIED against the real code, then verdict REFACTOR or HARDENING |
+| `security_officer` | **Yes**, if the diff touches auth, input handling or data | Security scan of the diff (secrets, OWASP) |
+| `backend_architect` / `frontend_architect` / `database_architect` / `qa_engineer` / `devops_engineer` / `documentation_writer` | **Yes, in parallel** | Only the domains the changeset actually touches |
+| `chief_engineer` | Only to break ties | Escalation when findings conflict |
+| `project_orchestrator` | No — this session | Context gathering, coordination, user communication |
+
+Materialize the independent reviews **in parallel** (code review ‖ security scan).
+
+See `.claude/DELEGATION_BRIDGE.md` for the full role map and the per-harness adapter.
+
 ## Steps
 
 ### Step 1: Context Gathering (project_orchestrator)

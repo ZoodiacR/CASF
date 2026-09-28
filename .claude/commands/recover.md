@@ -13,6 +13,27 @@ Executes emergency recovery for production incidents by triaging the incident, c
 - Emergency communication channels are established
 - Rollback plan exists for the affected release
 
+## Delegation — materialize, do not role-play
+
+The roles below are **subagents**, not personas. Materialize them; do not narrate them inline.
+
+An incident is exactly when an isolated second opinion pays for itself: the orchestrator is under pressure and biased toward "it's probably that one thing".
+
+- Roles live in `agents/<role>.md` and the framework plugin exposes each as a real subagent. Invoke it with the **`Task` tool**, passing `CONTEXT` + `TASK` + `OUTPUT`. Do **not** paste the `.md` into the prompt — the harness already loads its spec.
+- `project_orchestrator` is **this session**, not a subagent: it coordinates inline and spawns the rest.
+- **A reviewer is never the author.** For the post-mortem, the person who introduced the bug must not be the only one to explain it.
+
+| Role | Spawn? | When |
+|---|---|---|
+| `devops_engineer` | **Yes** | Execute containment and rollback; verify the affected environment |
+| `database_architect` | **Yes**, if data was touched | Assess data integrity and decide on forward vs back migration |
+| `architecture_reviewer` | **Yes**, for the post-mortem | Adversarial read of what actually happened, hypotheses marked against evidence |
+| `security_officer` | **Yes**, if the incident is security-related | Assess exposure and required disclosure |
+| `chief_engineer` | **Yes**, for root cause and the fix design | Owns the corrective ADR |
+| `project_orchestrator` | No — this session | Triage, coordination, communication, post-mortem |
+
+See `.claude/DELEGATION_BRIDGE.md` for the full role map and the per-harness adapter.
+
 ## Steps
 
 ### Step 1: Incident Triage (project_orchestrator)

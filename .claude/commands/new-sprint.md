@@ -12,6 +12,28 @@ Plans and executes a sprint by defining sprint goals, breaking down tasks, deleg
 - Sprint plan template must be available in `.claude/templates/sprint_plan.md`
 - Current project state must be recorded in `.claude/memory/`
 
+## Delegation — materialize, do not role-play
+
+The roles below are **subagents**, not personas. Materialize them; do not narrate them inline.
+
+- Roles live in `agents/<role>.md` and the framework plugin exposes each as a real subagent. Invoke it with the **`Task` tool**, passing `CONTEXT` + `TASK` + `OUTPUT`. Do **not** paste the `.md` into the prompt — the harness already loads its spec.
+- `project_orchestrator` is **this session**, not a subagent: it coordinates inline and spawns the rest.
+- **A reviewer is never the author.** The agent that wrote a slice must not review it. An inline review is not a review.
+
+| Role | Spawn? | When |
+|---|---|---|
+| `spec_quality_reviewer` | **Yes**, before building | Score the spec against `spec_quality_rubric.md`. A red-line blocks the build |
+| `chief_engineer` | **Yes** | Architecture design and ADRs; breaks ties |
+| `architecture_reviewer` | **Yes**, after each slice | Adversarial review of the real code. Verdict REFACTOR or HARDENING |
+| `code_reviewer` + `security_officer` | **Yes, in parallel**, pre-merge | Final gate on the diff |
+| `backend_architect` / `frontend_architect` / `database_architect` | **Yes**, per domain | Design each layer before implementing it |
+| `qa_engineer` / `devops_engineer` / `documentation_writer` | **Yes**, when the sprint touches tests, CI or docs | Sprint deliverables |
+| `project_orchestrator` | No — this session | Planning, coordination, retrospective |
+
+**Slice loop (chapter 26):** implement a slice → `architecture_reviewer` → fix (max 2 attempts per finding) → re-review → next slice. After the last slice, run a wildcard slice over all PENDING findings (up to 10 iterations); whatever survives becomes explicit tech debt.
+
+See `.claude/DELEGATION_BRIDGE.md` for the full role map and the per-harness adapter.
+
 ## Steps
 
 ### Step 1: Sprint Planning (project_orchestrator)

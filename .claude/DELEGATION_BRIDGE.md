@@ -1,10 +1,10 @@
 # DELEGATION_BRIDGE — Puente entre agentes conceptuales y subagentes reales
 
-> **Propósito:** el framework define agentes como *roles* (`.claude/agents/*.md`). Este documento es el **puente** que convierte esos roles en **subagentes reales del harness** (contexto aislado + ejecución paralela), en lugar de hacerlo todo inline en el orquestador.
+> **Propósito:** el framework define agentes como *roles* (`agents/*.md`). Este documento es el **puente** que convierte esos roles en **subagentes reales del harness** (contexto aislado + ejecución paralela), en lugar de hacerlo todo inline en el orquestador.
 >
 > Es la pieza que hace que el flujo QA (adversarial + slices) **se ejecute de verdad**, no "de palabra".
 >
-> **Principio de portabilidad:** el `.claude/agents/<name>.md` es la **única fuente de verdad**. Ninguna lógica de negocio del framework depende de un harness concreto; cada harness aporta solo un **adaptador fino** que traduce "materializa este rol" a su mecanismo nativo de subagentes. El orquestador piensa en **roles**, no en nombres de subagente del harness.
+> **Principio de portabilidad:** el `agents/<name>.md` es la **única fuente de verdad**. Ninguna lógica de negocio del framework depende de un harness concreto; cada harness aporta solo un **adaptador fino** que traduce "materializa este rol" a su mecanismo nativo de subagentes. El orquestador piensa en **roles**, no en nombres de subagente del harness.
 
 ---
 
@@ -35,7 +35,7 @@ MATERIALIZAR <rol>        # ej. architecture_reviewer
   PARALELO:  <sí | no — solo si es independiente de otras tareas>
 ```
 
-El rol se resuelve desde su spec `.claude/agents/<rol>.md`. **Solo en el momento de spawn** interviene el adaptador del harness (sección 3) para convertir esa invocación lógica en una llamada concreta.
+El rol se resuelve desde su spec `agents/<rol>.md`. **Solo en el momento de spawn** interviene el adaptador del harness (sección 3) para convertir esa invocación lógica en una llamada concreta.
 
 ---
 
@@ -43,7 +43,7 @@ El rol se resuelve desde su spec `.claude/agents/<rol>.md`. **Solo en el momento
 
 ### A. Claude Code — adaptador nativo (cero trabajo)
 
-En Claude Code, cada `.claude/agents/<name>.md` **ya es un subagente**: su `frontmatter` (`name`, `description`, `tools`, `model`) lo define y el harness lo lee directamente.
+En Claude Code, cada `agents/<name>.md` **ya es un subagente**: su `frontmatter` (`name`, `description`, `tools`, `model`) lo define y el harness lo lee directamente.
 
 ```text
 MATERIALIZAR architecture_reviewer
@@ -55,12 +55,12 @@ MATERIALIZAR architecture_reviewer
 
 ### B. Cursor — adaptador de mapeo (los subagentes son tipos built-in)
 
-En Cursor, los subagentes son **tipos built-in** que **no leen** `.claude/agents/*.md` automáticamente. El adaptador hace dos cosas: (1) mapea rol → tipo de subagente, y (2) **reproduce el contenido del `.md`** dentro del prompt (porque el harness no lo carga solo).
+En Cursor, los subagentes son **tipos built-in** que **no leen** `agents/*.md` automáticamente. El adaptador hace dos cosas: (1) mapea rol → tipo de subagente, y (2) **reproduce el contenido del `.md`** dentro del prompt (porque el harness no lo carga solo).
 
 Formato canónico del prompt de materialización en Cursor:
 
 ```text
-Actúa como <ROL> siguiendo su spec en .claude/agents/<rol>.md
+Actúa como <ROL> siguiendo su spec en agents/<rol>.md
 (la reproduzco a continuación). <CONTEXTO: paths, spec, ADR, intención>.
 <TAREA con criterios de aceptación>. <OUTPUT ESPERADO>.
 No propongas rewrite sin nombrar la forma de reemplazo.
@@ -79,7 +79,7 @@ No propongas rewrite sin nombrar la forma de reemplazo.
 
 ## 4. Mapa de roles (portable, con ambos adaptadores)
 
-| Rol (`.claude/agents/`) | Claude Code (nativo) | Cursor (mapeo) | Cuándo materializar |
+| Rol (`agents/`) | Claude Code (nativo) | Cursor (mapeo) | Cuándo materializar |
 |---|---|---|---|
 | `chief_engineer` (hipótesis) | subagente `chief_engineer` | `generalPurpose` | Diseño de arquitectura, ADRs, romper empates |
 | `architecture_reviewer` (evidencia) | subagente `architecture_reviewer` | `generalPurpose` | **Review adversarial post-implementación** (lee código, no resumen) |

@@ -61,7 +61,7 @@ This chapter defines the concrete criteria that must be met before any work is c
 - Merging without code review
 
 ### References
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for DoD enforcement
+- See [code_reviewer.md](agents/code_reviewer.md) for DoD enforcement
 - See [workflows/quality_gate.md](.claude/workflows/quality_gate.md) for quality gate implementation
 
 ---
@@ -133,7 +133,7 @@ This chapter defines the automated and manual quality gates that must be passed 
 
 ### References
 - See [workflows/quality_gate.md](.claude/workflows/quality_gate.md) for gate implementation
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for pre-merge gate
+- See [code_reviewer.md](agents/code_reviewer.md) for pre-merge gate
 
 ---
 
@@ -201,7 +201,7 @@ This chapter defines release processes and version management.
 
 ### References
 - See [workflows/release_workflow.md](.claude/workflows/release_workflow.md) for release process
-- See [devops_engineer.md](.claude/agents/devops_engineer.md) for deployment automation
+- See [devops_engineer.md](agents/devops_engineer.md) for deployment automation
 
 ---
 
@@ -333,8 +333,8 @@ This chapter defines when agents may act autonomously without asking, and when t
 - Not stopping when encountering conflicts
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for autonomous coordination
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural approval
+- See [project_orchestrator.md](agents/project_orchestrator.md) for autonomous coordination
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural approval
 
 ---
 

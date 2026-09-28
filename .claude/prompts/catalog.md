@@ -110,14 +110,14 @@ You are activating the CASF framework for autonomous project execution.
 
 1. Read CLAUDE.md in full — this is your operating manual.
 2. Read project_spec.md in full — this is what we're building.
-3. Read every file under .claude/agents/, .claude/commands/,
+3. Read every file under agents/, .claude/commands/,
    .claude/workflows/, and .claude/templates/.
 4. Read .claude/memory/ to load prior context (may be empty on first run).
 
 ## Activation
 
 Assume the role of **project_orchestrator** as defined in
-.claude/agents/project_orchestrator.md.
+agents/project_orchestrator.md.
 
 From this point on, you coordinate all other agents according to the
 delegation rules in CLAUDE.md Chapter 8.
@@ -480,7 +480,7 @@ This is how your framework gets **smarter over time**.
 - `../../README.md` — Full framework documentation.
 - `../../CLAUDE.md` — Master configuration (rules the AI follows).
 - `project_spec.md` — What you're building.
-- `.claude/agents/project_orchestrator.md` — Definition of the entry-point agent.
+- `agents/project_orchestrator.md` — Definition of the entry-point agent.
 - `.claude/commands/` — Slash commands referenced by the prompts.
 - `.claude/memory/` — Persistent context read by every boot sequence.
 

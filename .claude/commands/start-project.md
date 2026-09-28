@@ -12,6 +12,25 @@ Bootstraps a new project by gathering requirements through a bounded discovery i
 - `.claude/memory/` directory must exist and be empty or contain only seed content
 - User must be available for a discovery interview (approximately 15 turns)
 
+## Delegation — materialize, do not role-play
+
+The roles below are **subagents**, not personas. Materialize them; do not narrate them inline.
+
+- Roles live in `agents/<role>.md` and the framework plugin exposes each as a real subagent. Invoke it with the **`Task` tool**, passing `CONTEXT` + `TASK` + `OUTPUT`. Do **not** paste the `.md` into the prompt — the harness already loads its spec.
+- `project_orchestrator` is **this session**, not a subagent: it coordinates inline and spawns the rest.
+- **A reviewer is never the author.** An inline review is not a review.
+- Materialize **independent roles in parallel**; do **not** spawn for trivialities.
+
+| Role | Spawn? | When |
+|---|---|---|
+| `chief_engineer` | **Yes** | Architecture design and stack decisions (Design stage) |
+| `spec_quality_reviewer` | **Yes** | Score the spec against `spec_quality_rubric.md` **before** any build. A red-line blocks the build |
+| `backend_architect` / `frontend_architect` / `database_architect` | **Yes**, if the domain needs depth | Feasibility of the proposed stack |
+| `security_officer` | **Yes**, if the app handles money, PII or auth | Threat model before the spec is locked |
+| `project_orchestrator` | No — this session | Discovery interview, feasibility, coordination |
+
+See `.claude/DELEGATION_BRIDGE.md` for the full role map and the per-harness adapter.
+
 ## Steps
 
 ### Step 1: Discovery Interview (project_orchestrator)

@@ -12,6 +12,14 @@ Prints the current project state including sprint status, open tasks, blockers, 
 - Memory files must exist in `.claude/memory/`
 - Git repository must be accessible (for commit status)
 
+## No delegation (inline by design)
+
+This command is **inline on purpose**. It only reads and synthesizes state from `.claude/memory/`, the sprint plan and git. Spawning subagents for status is over-delegation (see the guardrails in `.claude/DELEGATION_BRIDGE.md` §6).
+
+The agent names that appear in the report (e.g. `backend_architect` as a task owner) are **labels of who owns a task**, not delegation targets. Do not spawn them here.
+
+If the report reveals work that needs doing, that work is delegated by `/new-sprint`, not by `/status`.
+
 ## Steps
 
 ### Step 1: Gather Project State (project_orchestrator)

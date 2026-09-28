@@ -54,8 +54,8 @@ This chapter defines the collective persona that governs all agent behavior with
 - "That's not my area — let someone else figure it out."
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for the coordination layer
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural decision authority
+- See [project_orchestrator.md](agents/project_orchestrator.md) for the coordination layer
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural decision authority
 
 ---
 
@@ -86,8 +86,8 @@ These principles are the foundational values that guide all decision-making with
 - Adding complexity "for future flexibility" without current requirements
 
 ### References
-- See [security_officer.md](.claude/agents/security_officer.md) for security implementation
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for testing strategy
+- See [security_officer.md](agents/security_officer.md) for security implementation
+- See [qa_engineer.md](agents/qa_engineer.md) for testing strategy
 
 ---
 
@@ -106,7 +106,7 @@ This chapter defines how agents communicate with each other, with the user, and 
 
 ### Examples
 **Good:**
-- "I'm delegating API design to backend_architect. See handoff protocol in .claude/agents/backend_architect.md"
+- "I'm delegating API design to backend_architect. See handoff protocol in agents/backend_architect.md"
 - "Recording architectural decision in ADR-001: Use PostgreSQL for primary data store"
 
 **Bad:**
@@ -115,7 +115,7 @@ This chapter defines how agents communicate with each other, with the user, and 
 - Silent failures or assumptions about other agents' work
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for handoff coordination
+- See [project_orchestrator.md](agents/project_orchestrator.md) for handoff coordination
 - See [templates/adr.md](.claude/templates/adr.md) for decision documentation format
 
 ---
@@ -253,7 +253,7 @@ This chapter defines how decisions are made, documented, and enforced within the
 - Ignoring dissenting opinions from specialist agents
 
 ### References
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural authority
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural authority
 - See [templates/adr.md](.claude/templates/adr.md) for ADR format
 
 ---
@@ -294,8 +294,8 @@ This chapter defines the high-level architectural principles that all systems mu
 - Synchronous calls to external services without timeout handling
 
 ### References
-- See [backend_architect.md](.claude/agents/backend_architect.md) for backend architecture
-- See [frontend_architect.md](.claude/agents/frontend_architect.md) for frontend architecture
+- See [backend_architect.md](agents/backend_architect.md) for backend architecture
+- See [frontend_architect.md](agents/frontend_architect.md) for frontend architecture
 
 ---
 
@@ -338,7 +338,7 @@ This chapter defines the delegation matrix — which agent delegates to whom, wh
 
 5. **No Circular Delegation:** Agent A may delegate to B, but B must not delegate back to A for the same task. Escalate to project_orchestrator instead.
 
-6. **Materialize agents as subagents (mandatory when the harness supports it):** The agents defined in `.claude/agents/*.md` are **roles**, not just prose. When the orchestrator runs on a harness that provides real subagent/task spawning (Cursor `Task` subagents, Claude Code subagents), it MUST **materialize** each role as a real subagent instead of enacting it inline, whenever the task is (a) independent/parallelizable, (b) an adversarial review that needs a distinct "brain", or (c) a large code-read that shouldn't pollute the main context. The `.md` is the **single portable source of truth**; each harness contributes only a thin adapter (native subagent in Claude Code, role→built-in-type mapping in Cursor). Mapping, prompt format, and guardrails (cost, triviality, "the reviewer is never the author") live in [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md). A review done inline by the author is NOT a review.
+6. **Materialize agents as subagents (mandatory when the harness supports it):** The agents defined in `agents/*.md` are **roles**, not just prose. When the orchestrator runs on a harness that provides real subagent/task spawning (Cursor `Task` subagents, Claude Code subagents), it MUST **materialize** each role as a real subagent instead of enacting it inline, whenever the task is (a) independent/parallelizable, (b) an adversarial review that needs a distinct "brain", or (c) a large code-read that shouldn't pollute the main context. The `.md` is the **single portable source of truth**; each harness contributes only a thin adapter (native subagent in Claude Code, role→built-in-type mapping in Cursor). Mapping, prompt format, and guardrails (cost, triviality, "the reviewer is never the author") live in [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md). A review done inline by the author is NOT a review.
 
 ### Examples
 **Good:**
@@ -398,8 +398,8 @@ This chapter defines the baseline code quality standards that all code must meet
 - Functions exceeding 50 lines without decomposition
 
 ### References
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for quality enforcement
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for automated quality checks
+- See [code_reviewer.md](agents/code_reviewer.md) for quality enforcement
+- See [qa_engineer.md](agents/qa_engineer.md) for automated quality checks
 
 ---
 
@@ -446,8 +446,8 @@ This chapter defines backend development standards and practices.
 - Missing input validation on API endpoints
 
 ### References
-- See [backend_architect.md](.claude/agents/backend_architect.md) for backend architecture
-- See [security_officer.md](.claude/agents/security_officer.md) for API security
+- See [backend_architect.md](agents/backend_architect.md) for backend architecture
+- See [security_officer.md](agents/security_officer.md) for API security
 
 ---
 
@@ -503,8 +503,8 @@ This chapter defines frontend development standards and practices.
 - Missing keyboard navigation support
 
 ### References
-- See [frontend_architect.md](.claude/agents/frontend_architect.md) for frontend architecture
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for frontend testing
+- See [frontend_architect.md](agents/frontend_architect.md) for frontend architecture
+- See [qa_engineer.md](agents/qa_engineer.md) for frontend testing
 
 ---
 
@@ -564,8 +564,8 @@ This chapter defines database development standards and practices.
 - N+1 query patterns in application code
 
 ### References
-- See [database_architect.md](.claude/agents/database_architect.md) for database architecture
-- See [devops_engineer.md](.claude/agents/devops_engineer.md) for backup infrastructure
+- See [database_architect.md](agents/database_architect.md) for database architecture
+- See [devops_engineer.md](agents/devops_engineer.md) for backup infrastructure
 
 ---
 
@@ -629,8 +629,8 @@ This chapter defines security standards that must be followed across all layers 
 - Rolling custom crypto instead of using standard libraries
 
 ### References
-- See [security_officer.md](.claude/agents/security_officer.md) for security implementation
-- See [backend_architect.md](.claude/agents/backend_architect.md) for API security
+- See [security_officer.md](agents/security_officer.md) for security implementation
+- See [backend_architect.md](agents/backend_architect.md) for API security
 
 ---
 
@@ -693,8 +693,8 @@ This chapter defines testing standards and coverage requirements.
 - Skipping tests for "simple" code
 
 ### References
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for testing strategy
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for test review
+- See [qa_engineer.md](agents/qa_engineer.md) for testing strategy
+- See [code_reviewer.md](agents/code_reviewer.md) for test review
 
 ---
 
@@ -758,7 +758,7 @@ This chapter defines documentation standards and requirements.
 - Comments that repeat the code
 
 ### References
-- See [documentation_writer.md](.claude/agents/documentation_writer.md) for documentation management
+- See [documentation_writer.md](agents/documentation_writer.md) for documentation management
 - See [templates/adr.md](.claude/templates/adr.md) for ADR format
 
 ---
@@ -819,8 +819,8 @@ This chapter defines infrastructure and DevOps standards.
 - Inconsistent environments across stages
 
 ### References
-- See [devops_engineer.md](.claude/agents/devops_engineer.md) for DevOps implementation
-- See [security_officer.md](.claude/agents/security_officer.md) for secrets management
+- See [devops_engineer.md](agents/devops_engineer.md) for DevOps implementation
+- See [security_officer.md](agents/security_officer.md) for secrets management
 
 ---
 
@@ -882,7 +882,7 @@ This chapter defines monitoring and observability standards.
 - Missing correlation IDs in logs
 
 ### References
-- See [devops_engineer.md](.claude/agents/devops_engineer.md) for monitoring setup
+- See [devops_engineer.md](agents/devops_engineer.md) for monitoring setup
 - See [workflows/emergency_recovery.md](.claude/workflows/emergency_recovery.md) for incident response
 
 ---
@@ -946,8 +946,8 @@ This chapter defines performance standards and optimization practices.
 - Missing pagination on large datasets
 
 ### References
-- See [backend_architect.md](.claude/agents/backend_architect.md) for backend performance
-- See [frontend_architect.md](.claude/agents/frontend_architect.md) for frontend performance
+- See [backend_architect.md](agents/backend_architect.md) for backend performance
+- See [frontend_architect.md](agents/frontend_architect.md) for frontend performance
 
 ---
 
@@ -1009,8 +1009,8 @@ This chapter defines error handling standards across all layers.
 - Exposing stack traces to users
 
 ### References
-- See [backend_architect.md](.claude/agents/backend_architect.md) for backend error handling
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for error testing
+- See [backend_architect.md](agents/backend_architect.md) for backend error handling
+- See [qa_engineer.md](agents/qa_engineer.md) for error testing
 
 ---
 
@@ -1077,7 +1077,7 @@ This chapter defines the concrete criteria that must be met before any work is c
 - Merging without code review
 
 ### References
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for DoD enforcement
+- See [code_reviewer.md](agents/code_reviewer.md) for DoD enforcement
 - See [workflows/quality_gate.md](.claude/workflows/quality_gate.md) for quality gate implementation
 
 ---
@@ -1149,7 +1149,7 @@ This chapter defines the automated and manual quality gates that must be passed 
 
 ### References
 - See [workflows/quality_gate.md](.claude/workflows/quality_gate.md) for gate implementation
-- See [code_reviewer.md](.claude/agents/code_reviewer.md) for pre-merge gate
+- See [code_reviewer.md](agents/code_reviewer.md) for pre-merge gate
 
 ---
 
@@ -1217,7 +1217,7 @@ This chapter defines release processes and version management.
 
 ### References
 - See [workflows/release_workflow.md](.claude/workflows/release_workflow.md) for release process
-- See [devops_engineer.md](.claude/agents/devops_engineer.md) for deployment automation
+- See [devops_engineer.md](agents/devops_engineer.md) for deployment automation
 
 ---
 
@@ -1349,8 +1349,8 @@ This chapter defines when agents may act autonomously without asking, and when t
 - Not stopping when encountering conflicts
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for autonomous coordination
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural approval
+- See [project_orchestrator.md](agents/project_orchestrator.md) for autonomous coordination
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural approval
 
 ---
 
@@ -1457,8 +1457,8 @@ This chapter defines the quality loop that runs **after implementation**. It pre
 
 ### References
 - [workflows/slice_review_workflow.md](.claude/workflows/slice_review_workflow.md) — slices + adversarial review + wildcard slice
-- [agents/architecture_reviewer.md](.claude/agents/architecture_reviewer.md) — the evidence-mode reviewer
-- [agents/spec_quality_reviewer.md](.claude/agents/spec_quality_reviewer.md) — the spec quality gate
+- [agents/architecture_reviewer.md](agents/architecture_reviewer.md) — the evidence-mode reviewer
+- [agents/spec_quality_reviewer.md](agents/spec_quality_reviewer.md) — the spec quality gate
 - [templates/spec_quality_rubric.md](.claude/templates/spec_quality_rubric.md) — the 12-dimension scoring rubric
 - `.claude/examples/PROJECT_SPEC.md` — the benchmark rich spec (quality bar)
 
