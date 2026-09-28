@@ -1,3 +1,6 @@
+---
+description: Runs a comprehensive code and architecture review of the current changeset against quality standards and the Definition of Done. Use when the user asks to review changes or a pull request.
+---
 # /review
 
 ## Purpose

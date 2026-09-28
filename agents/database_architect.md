@@ -1,3 +1,7 @@
+---
+name: database-architect
+description: Designs normalized schemas, versioned migrations, index strategy and transactional integrity. Use for new data models, schema migrations, query performance or N+1 problems, data-integrity issues, and backup, recovery or sharding decisions.
+---
 # Agent: database_architect
 
 ## Role

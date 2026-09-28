@@ -3,14 +3,16 @@
 > ⚠️ **THIS IS THE RESUME FILE.** Updated by `context_manager` before/after every task. Read this first when resuming.
 
 ## 📌 Snapshot
-- **Last updated:** 2026-09-24 (tarde) — sesión en curso
-- **Lifecycle stage:** Build (Etapa "Build LLM-driven" — Claude Code implementa el código, no el materializador)
-- **Current sprint:** Sprint 2 — Comercialización + Build LLM-driven con resume
+- **Last updated:** 2026-09-28 (tarde) — sesión en curso
+- **Lifecycle stage:** Ship — el framework se publica como **plugin de Claude Code v1.0.0**
+- **Current sprint:** Sprint 2 — Comercialización + Build LLM-driven + distribución como plugin
 - **Working branch:** main
-- **Last commit:** (local) build LLM-driven por slices + resume memory.md + tokens reales
-- **Overall status:** 🟢 Build LLM-driven funcionando end-to-end (VetSalud, 26 archivos, monorepo limpio). Demo completa con backend real en `:4002`. Falta push + pasarela real (Yape/Stripe) + tests en CI.
+- **Last commit:** (local) contabilidad real de prompt cache + CASF como plugin de Claude Code
+- **Overall status:** 🟢 CASF queda instalable como plugin (`claude plugin marketplace add ZoodiacR/CASF` → `plugin details casf` = **Skills 8 · Agents 14**). CASF Studio ahora contabiliza el prompt cache de verdad (4 campos de usage, costo prorrateado, hit rate y ahorro en el Dashboard; 18/18 tests verdes). Falta validar el hit rate con una corrida real y publicar en el marketplace comunitario.
 
 ## ✅ Completed (most recent first)
+- [x] **CASF empaquetado como plugin oficial de Claude Code (v1.0.0)**: el repo es ahora **marketplace + plugin**. `.claude-plugin/plugin.json` (manifest) + `.claude-plugin/marketplace.json` (catálogo) permiten a un tercero hacer `/plugin marketplace add ZoodiacR/CASF` + `/plugin install casf@casf`. Los 14 agentes ganaron **frontmatter YAML con `name` en kebab-case** (obligatorio: Claude Code rechaza guiones bajos y **salta el archivo en silencio**) y se movieron de `.claude/agents/` a **`agents/` en la raíz** con `git mv` (historial preservado). Los 7 comandos ganaron frontmatter. La constitución viaja como **skill** (`skills/casf-framework/SKILL.md`) porque **`CLAUDE.md` en la raíz de un plugin no se carga como contexto**. Añadidos `LICENSE` (MIT) y `CHANGELOG.md`. README reescrito alrededor del plugin + conteo de agentes corregido (12 → 14). **Verificado**: `claude plugin details casf` → **Skills (8) · Agents (14)**; `claude plugin validate .` → passed. Bug descubierto y aislado: el campo `agents` del manifest se acepta en `validate` pero el loader **no lo honra** (probado con 2 plugins de prueba). Decisión + lección LL-024.
+- [x] **Contabilidad real de prompt cache en CASF Studio**: se leía **solo** `input_tokens`, que en Anthropic es únicamente la parte posterior al último breakpoint de caché → el costo registrado se **subestimaba** cuando el caché funcionaba. Ahora `Usage` lleva 4 campos (`inputTokens` TOTAL + `cacheReadTokens`/`cacheWriteTokens` como subconjunto), un normalizador único (`src/usage.ts`) entiende los dos esquemas del cable (Anthropic `input_tokens`+`cache_*` y DeepSeek `prompt_tokens`+`prompt_cache_hit/miss_tokens`), y `costOf()` prorratea las tres categorías con tarifas propias. Nuevos: `costWithoutCache()` (ahorro real), `cacheHitRate()`, `describeUsage()` (hace **visible** en el log en vivo si el hit rate es 0%), `cacheSavings` en `/api/cost`. El ledger y el Dashboard muestran hit rate y ahorro. **18/18 tests verdes** (`test/usage.test.ts`), `tsc --noEmit` limpio en back y front, build de Vite ok. Decisión + lección LL-023.
 - [x] **Revisión adversarial de vistas VetSalud (todas OK + 3 hallazgos PENDING)**: recorridas las 11 vistas con navegación real por hash en el navegador interno. **Todas funcionales**: Panel (#/dashboard: KPIs + agenda + vacunas + inventario + cobros de hoy), Agenda (#/appointments: 7 citas sembradas + filtros veterinario/estado + vista día/semana + cambiar estado/reprogramar), Reportes (#/reports: rango fechas + 7d/30d/90d + 5 secciones + CSV), Auditoría (#/audit: 20 eventos + filtros acción/entidad + paginación + detalle), Personal (#/users: CRUD usuarios + restablecer contraseña), Configuración (#/settings: datos clínica + horarios + umbrales + moneda PEN). **Hallazgos adversariales (verdict HARDENING — mejorar en sitio, no refactor)**: (1) banner de error "Algo salió mal" no se limpia tras re-login (estado de error no reseteado — visible 157×24px en todas las vistas); (2) rutas hash desconocidas caen al dashboard sin 404; (3) sesión expira a los 15 min (correcto por seguridad, molesto en demo). Los 3 quedan PENDING para el slice comodín.
 - [x] **Build LLM-driven por slices con resume (`memory.md`) + tokens reales**: el build de Claude Code dejó de ser monolítico (se pasaba del timeout a los 10 min) y pasó a **3 slices** (`backend` → `frontend` → `root`), cada uno con su `claude -p --output-format stream-json --verbose` + timeout propio. **Resume automático**: un `memory.md` dentro del proyecto generado (escrito/leído por el agente) marca `[x]` cada slice completado; el engine omite los ya hechos (y usa fallback de disco ante timeout parcial). **Tokens reales**: se captura `usage.input_tokens`/`output_tokens` del evento `result` del stream-json y se acumula en el ledger + `memory.md`. Verificado end-to-end con **VetSalud** (clínica veterinaria): spec rico → build en slices (backend 8 archivos → frontend 3 → root 6) → 26 archivos, monorepo limpio `frontend/`+`backend/`+raíz. Costo real capturado: `$0.0634` (70372 in / 40347 out). Lecciones LL-020/LL-021/LL-022 + decisión registradas.
 - [x] **Demo VetSalud completa con backend real (puerto 4002)**: levantado el backend generado (`backend/src/server.js` + `.env` con JWT estable, gitignored). La app corre single-origin (API + frontend) y todas las vistas cargan con datos sembrados: Dashboard (KPIs del día), Vacunas (carnet + "Aplicar dosis"), Inventario (14 medicamentos + Kardex + movimientos), Cobros y caja (pendientes/pagados/anulados + cierre de caja + desglose por método), app-shell con hash routing (Panel/Agenda/Dueños/Pacientes/Vacunas/Inventario/Cobros/Reportes/Auditoría/Personal/Configuración). Credenciales demo: `admin@vetsalud.pe / VetSalud2026!` (siembra automática `seedIfEmpty`).
@@ -85,13 +87,14 @@
 - [ ] **Conectar LLM real (DeepSeek)** para specs ricos — pendiente de API key del usuario
 
 ## ⏭️ Next actions (in order)
-1. **Navegación por vistas (app shell) en apps generadas** ⭐ — corregir el "single-page con todo apilado": barra lateral/tabs con una función por vista (`#/dashboard`, `#/clients`, `#/appointments`…), hash routing, store compartido + `render*()` por vista. Ver `.claude/DESIGN_SYSTEM.md` §8 y `.claude/PATRON_DE_DISENO.md` §3bis regla 9.
-2. **Dominio agnóstico al tipo de negocio (no barbería-hardcoded)** ⭐ — el loyalty/citas debe servir a cualquier negocio de servicios (barbería, uñas, masajes, clínica, gimnasio…), como `.claude/examples/PROJECT_SPEC.md` ("Loyalify"). Quitar datos duros de barbería en `materializer.ts` (seed de services "Corte/Manicure/Masaje", staff "Barbero senior/junior", `T.staff` "Staff / barberos", bot) y `llm.ts` (`richSections` "empleado/barbero"). Seed neutro o vacío con onboarding del dueño. Ver `.claude/PATRON_DE_DISENO.md` §3 regla 5.
-3. **Etapa 2.4 — Componentes premium anti-IA** (empty states ilustrados con icono+CTA, estados de error/éxito bonitos, tablas con sticky header)
-4. **Etapa 2.5 — Responsive + accesibilidad** (WCAG AA, focus visible, targets ≥44px, verificación móvil/tablet/desktop)
-5. **Etapa 5.1 — Yape/transferencia real** (`MockPaymentProvider` → QR + datos bancarios + `pending → paid`) — primer cobro de verdad
-6. **Etapa 1.1 — CI** (mover `smoke-monetization.mjs` a suite automatizada en cada push)
-7. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
+1. **Validar el hit rate de caché con una corrida real** ⭐ — correr un build real desde CASF Studio y mirar la línea `↳ usage: … caché X% …` del log en vivo y la tarjeta "Aciertos de caché" del Dashboard. Si sale **0%**, la hipótesis a probar es **prefijo inestable** (contenido dinámico inyectado por el harness), **no** el PID. Ver `docs/PLAN_CACHE_Y_PLUGIN.md` Fase 4.
+2. **Publicar el plugin en el marketplace comunitario** ⭐ — enviarlo a `anthropics/claude-plugins-community` para su revisión (la instalación desde GitHub ya funciona hoy). Requiere CHANGELOG y semver al día, y **bump de `version` en `plugin.json` en cada release** (el version es la cache key del plugin: sin bump, los usuarios no reciben cambios).
+3. **Reportar el bug del campo `agents`** a `anthropics/claude-code`, con la reproducción mínima de los dos plugins de prueba (`validate` da verde pero el runtime carga 0 agentes).
+4. **Etapa 2.4 — Componentes premium anti-IA** (empty states ilustrados con icono+CTA, estados de error/éxito bonitos, tablas con sticky header)
+5. **Etapa 2.5 — Responsive + accesibilidad** (WCAG AA, focus visible, targets ≥44px, verificación móvil/tablet/desktop)
+6. **Etapa 5.1 — Yape/transferencia real** (`MockPaymentProvider` → QR + datos bancarios + `pending → paid`) — primer cobro de verdad
+7. **Etapa 1.1 — CI** (mover `smoke-monetization.mjs` y `test/usage.test.ts` a suite automatizada en cada push)
+8. Persistencia del check-in/QR contra la BD real (no solo localStorage) cuando haya backend
 
 ## 🚧 Blockers / pending decisions
 - **API key de DeepSeek**: pendiente de que el usuario la ponga en `.env` (nunca en repo).
@@ -111,11 +114,12 @@
 - Último costo registrado: ~$0.000161 por generación
 
 ## 📁 Files currently being edited
-- `casf-studio/backend/src/llm.ts` (5 dominios nuevos + fixes de colisión de keywords)
-- `casf-studio/frontend/src/App.tsx` (auto-refine al build, indicador dirty, cache-busting preview)
-- `casf-studio/frontend/src/i18n.ts` + `styles.css` (chip warn + traducciones)
-- `casf-studio/frontend/src/Memory.tsx` (botón alternar resumen/memory.md)
-- `casf-studio/backend/src/materializer.ts` (check-in QR + CRUD SaaS + Docker + widgets)
-- `casf-studio/backend/src/spec.ts` (applyFeedback complejo: entidad Employee, página /owner)
-- `CASF/docs/sprint/sprint_1_plan.md` (plan de sprint)
+- `CASF/.claude-plugin/plugin.json` + `marketplace.json` (manifest y catálogo del plugin)
+- `CASF/agents/*.md` (14 agentes con frontmatter kebab-case, movidos desde `.claude/agents/`)
+- `CASF/.claude/skills/casf-framework/SKILL.md` (la constitución como skill)
+- `CASF/README.md` + `CHANGELOG.md` + `docs/PLAN_CACHE_Y_PLUGIN.md`
+- `casf-studio/backend/src/usage.ts` (nuevo: normalizador de usage) + `cost.ts` + `ledger.ts`
+- `casf-studio/backend/src/claudeCodeProvider.ts` + `llmBuild.ts` + `llm.ts` + `index.ts`
+- `casf-studio/frontend/src/Dashboard.tsx` + `api.ts` + `i18n.ts` (tarjetas de caché)
+- `casf-studio/backend/test/usage.test.ts` (nuevo: 12 tests del normalizador y del costo con caché)
 

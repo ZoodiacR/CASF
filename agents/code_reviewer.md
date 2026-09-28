@@ -1,3 +1,7 @@
+---
+name: code-reviewer
+description: Runs the final review before merge, verifying the Definition of Done and quality gates and blocking changesets that violate standards. Use when a pull request or slice of work needs verification, or when quality-gate failures, coverage gaps or documentation gaps surface.
+---
 # Agent: code_reviewer
 
 ## Role

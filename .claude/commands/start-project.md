@@ -1,3 +1,6 @@
+---
+description: Bootstraps a new project through a bounded discovery interview, feasibility analysis, and an initial specification plus Sprint 0 plan. Use when the user asks to start or bootstrap a new project.
+---
 # /start-project
 
 ## Purpose

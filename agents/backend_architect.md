@@ -1,3 +1,7 @@
+---
+name: backend-architect
+description: Designs REST APIs with OpenAPI contracts, service-layer patterns, async jobs, rate limiting and request tracing. Use when a feature needs an API design, when service boundaries or background processing change, or when backend performance and refactoring decisions arise.
+---
 # Agent: backend_architect
 
 ## Role

@@ -1,3 +1,7 @@
+---
+name: cost-accountant
+description: Tracks token usage and computes LLM and API cost in a running ledger so the user knows what a session or project costs. Use on session boot, after each agent turn or API call, and when a budget threshold is crossed or a status or ship report needs a cost summary.
+---
 # Agent: cost_accountant
 
 ## Role

@@ -1,3 +1,7 @@
+---
+name: spec-quality-reviewer
+description: Scores generated project specs against the quality rubric before any build, flagging thin specs and red-line failures. Use when a spec is generated or edited in CASF Studio, or when the generator prompt changes and needs regression checking.
+---
 # Agent: spec_quality_reviewer
 
 ## Role

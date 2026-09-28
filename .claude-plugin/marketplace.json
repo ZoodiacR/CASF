@@ -1,0 +1,16 @@
+{
+  "name": "casf",
+  "description": "CASF turns a rough idea into a production-grade project spec and a working application, using 14 specialist subagents and a 25-chapter engineering constitution.",
+  "owner": {
+    "name": "Andy León Vera",
+    "url": "https://github.com/ZoodiacR"
+  },
+  "plugins": [
+    {
+      "name": "casf",
+      "source": "./",
+      "description": "Turns a rough idea into a production-grade project spec and a working app, with 14 specialist subagents and a 25-chapter engineering constitution.",
+      "version": "1.0.0"
+    }
+  ]
+}

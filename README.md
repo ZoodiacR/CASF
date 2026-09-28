@@ -1,6 +1,6 @@
 # 🤖 CASF — Claude Autonomous Software Framework
 
-> A modular, agent-based framework that turns Claude Code (or any capable AI coding agent) into a coordinated team of 12 senior engineers working on your project autonomously — with checkpoints, memory, and quality gates.
+> A modular, agent-based framework that turns Claude Code (or any capable AI coding agent) into a coordinated team of 14 senior engineers working on your project autonomously — with checkpoints, memory, and quality gates. Ships as an installable Claude Code plugin.
 
 ---
 
@@ -12,7 +12,7 @@
 4. [Architecture](#-architecture)
 5. [Project Structure](#-project-structure)
 6. [Installation & Setup](#-installation--setup)
-7. [The 10 Agents](#-the-10-agents)
+7. [The 14 Agents](#-the-14-agents)
 8. [Slash Commands](#-slash-commands)
 9. [Workflows](#-workflows)
 10. [How to Use It](#-how-to-use-it)
@@ -32,7 +32,7 @@ Think of it as **"Rails for AI-assisted development"**: convention over configur
 
 ### At a Glance
 
-- 🧠 **12 specialized agents** (orchestrator, context manager, cost accountant, architects, security, QA, DevOps, etc.)
+- 🧠 **14 specialized agents** (orchestrator, context manager, cost accountant, architects, security, QA, DevOps, etc.)
 - ⚡ **7 slash commands** (`/start-project`, `/new-sprint`, `/review`, `/ship`, `/recover`, `/resume`, `/status`)
 - 🔄 **4 orchestrated workflows** (sprint, quality gate, release, emergency recovery)
 - 📚 **6 reusable templates** (ADR, sprint plan, PR, post-mortem, spec)
@@ -63,7 +63,7 @@ Working with AI coding assistants at scale exposes recurring pain points:
 | Context loss | `.claude/memory/` persists decisions, lessons, tech debt |
 | Style inconsistency | Agents enforce specific chapters of `CLAUDE.md` |
 | No decision trail | Every architectural choice logged as an ADR |
-| Lone wolf feeling | 10 agents delegate work with defined handoffs |
+| Lone wolf feeling | 14 agents delegate work with defined handoffs |
 | AI drifting off-spec | Quality gates and Definition of Done block bad output |
 
 ---
@@ -132,27 +132,38 @@ CASF prefers **bounded autonomy**: the AI can work freely within a task or sprin
 
 ## 📁 Project Structure
 
-After running the bootstrap script, your project will look like this:
+This is the layout of the CASF repo. Entries marked ★ form the **plugin surface** — the
+components Claude Code loads when CASF is installed as a plugin.
 
 ```
-your-project/
+CASF/
+├── .claude-plugin/
+│   ├── plugin.json                  # ★ Plugin manifest
+│   └── marketplace.json             # ★ Marketplace catalog (plugin@marketplace)
+├── agents/                          # ★ 14 subagents (plugin root — NOT .claude/)
+│   ├── project_orchestrator.md
+│   ├── chief_engineer.md
+│   ├── context_manager.md
+│   ├── cost_accountant.md
+│   ├── backend_architect.md
+│   ├── frontend_architect.md
+│   ├── database_architect.md
+│   ├── security_officer.md
+│   ├── qa_engineer.md
+│   ├── devops_engineer.md
+│   ├── documentation_writer.md
+│   ├── code_reviewer.md
+│   ├── architecture_reviewer.md
+│   └── spec_quality_reviewer.md
 ├── CLAUDE.md                        # Master config (loaded by Claude Code)
-├── project_spec.md                  # What we're building
-├── README.md                        # This file (or your project's README)
+├── README.md
+├── LICENSE
+├── Dockerfile
 ├── .claude/
 │   ├── README.md                    # Framework internal readme
-│   ├── agents/                      # 10 specialist agents
-│   │   ├── project_orchestrator.md
-│   │   ├── chief_engineer.md
-│   │   ├── backend_architect.md
-│   │   ├── frontend_architect.md
-│   │   ├── database_architect.md
-│   │   ├── security_officer.md
-│   │   ├── qa_engineer.md
-│   │   ├── devops_engineer.md
-│   │   ├── documentation_writer.md
-│   │   └── code_reviewer.md
-│   ├── commands/                    # Slash commands
+│   ├── skills/casf-framework/
+│   │   └── SKILL.md                 # ★ The constitution, delivered as a skill
+│   ├── commands/                    # ★ Slash commands
 │   │   ├── start-project.md
 │   │   ├── new-sprint.md
 │   │   ├── review.md
@@ -200,42 +211,62 @@ your-project/
 
 ### Requirements
 
-- **Claude Code** (or another capable agentic coding assistant: Cursor, Windsurf, Aider…)
+- **Claude Code** (v2.1.x or later) — or another capable agentic assistant (Cursor, Windsurf, Aider…)
 - **Git** for version control
-- **Bash** (Linux/Mac/WSL) or **CMD/PowerShell** (Windows) to run the bootstrap script
+- Node.js 20+ *only if* you want to run CASF Studio (the web UI)
 
-### Setup in 3 steps
+### Option A — Install as a Claude Code plugin (recommended)
 
-#### 1️⃣ Bootstrap the skeleton
+CASF ships as a plugin: **14 subagents**, **7 slash commands**, and the constitution delivered
+as a skill (a plugin's `CLAUDE.md` is not loaded as context, so the operating rules ship as
+`skills/casf-framework/SKILL.md`).
 
-**Linux / Mac / WSL:**
 ```bash
-chmod +x bootstrap_casf.sh
-./bootstrap_casf.sh
+claude plugin marketplace add ZoodiacR/CASF
+claude plugin install casf@casf
 ```
 
-**Windows (CMD):**
-```cmd
-bootstrap_casf.bat
+Or from inside a Claude Code session:
+
+```
+/plugin marketplace add ZoodiacR/CASF
+/plugin install casf@casf
 ```
 
-This creates all folders and stub Markdown files.
+Confirm the components actually loaded:
 
-#### 2️⃣ Fill the framework with the Filler Prompt
+```bash
+claude plugin details casf
+```
 
-Open Claude Code in the project folder and paste the **CASF Filler Prompt** (see [Prompt Library](#-prompt-library) below). The AI will materialize every stub file with production-grade content across 7 phases, waiting for your approval at each phase boundary.
+You should see `Skills (8)` and `Agents (14)`. Once installed, the agents are available in
+every project — invoke them as `@casf:code-reviewer`, `@casf:security-officer`, and so on.
 
-#### 3️⃣ Write your `project_spec.md`
+### Option B — Clone it and use it as a project
 
-Either:
-- Write it yourself using `.claude/templates/spec_template.md`, **or**
-- Use the `/start-project` interview to have the AI collect requirements from you.
+```bash
+git clone https://github.com/ZoodiacR/CASF.git
+cd CASF
+```
 
-Now you're ready to build. 🚀
+Opening that folder in Claude Code loads `CLAUDE.md` automatically, so the constitution and
+the `.claude/` conventions apply to that project. This is the mode CASF Studio uses: it runs
+headless Claude Code sessions with the repo as the working directory.
+
+> Want the framework's subagents available to Claude Code itself? Install the plugin
+> (Option A) — subagents live in the plugin's root `agents/` directory, not in `.claude/`.
+> See [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json).
+
+### Next step — get a spec
+
+- Run `/start-project` for the bounded discovery interview, **or**
+- Write `project_spec.md` yourself using [`.claude/templates/spec_template.md`](.claude/templates/spec_template.md).
+
+Then let the orchestrator build it in slices, with the adversarial review loop. 🚀
 
 ---
 
-## 👥 The 12 Agents
+## 👥 The 14 Agents
 
 | Agent | Role | Enforces |
 |---|---|---|
@@ -251,6 +282,8 @@ Now you're ready to build. 🚀
 | **devops_engineer** | CI/CD, deploys, observability, rollback | Deployment rules |
 | **documentation_writer** | README, ADRs, API docs, changelogs | Documentation rules (Ch. 15) |
 | **code_reviewer** | Final PR gate, blocks bad merges | Definition of Done |
+| **architecture_reviewer** | Adversarial post-implementation review, refactor vs hardening | Ch. 26 (evidence mode) |
+| **spec_quality_reviewer** | Scores generated specs against the rubric before any build | Spec quality gate |
 
 ---
 

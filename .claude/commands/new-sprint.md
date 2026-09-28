@@ -1,3 +1,6 @@
+---
+description: Plans and executes a sprint end to end, from goal definition to retrospective. Use when the user asks to start, plan, or run a sprint.
+---
 # /new-sprint
 
 ## Purpose

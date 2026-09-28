@@ -1,0 +1,24 @@
+{
+  "name": "casf",
+  "displayName": "CASF — Collective Agent Software Framework",
+  "version": "1.0.0",
+  "description": "Turns a rough idea into a production-grade project spec and a working app. Ships 14 specialist subagents, the orchestrator/architect/reviewer delegation chain, slash commands, a 25-chapter engineering constitution, and quality gates.",
+  "author": {
+    "name": "Andy León Vera",
+    "url": "https://github.com/ZoodiacR"
+  },
+  "homepage": "https://github.com/ZoodiacR/CASF",
+  "repository": "https://github.com/ZoodiacR/CASF",
+  "license": "MIT",
+  "keywords": [
+    "framework",
+    "agents",
+    "orchestration",
+    "spec-driven",
+    "architecture",
+    "quality-gates",
+    "subagents"
+  ],
+  "commands": "./.claude/commands/",
+  "skills": ["./.claude/skills/"]
+}

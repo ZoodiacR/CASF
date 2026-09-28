@@ -1,3 +1,7 @@
+---
+description: Resumes a project exactly where it was left off after token exhaustion, a closed session, or a context reset, using the live checkpoint instead of re-explaining. Use when the user says resume or continue.
+argument-hint: "[--auto]"
+---
 # Command: /resume
 
 ## Purpose

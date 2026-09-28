@@ -1,3 +1,7 @@
+---
+name: context-manager
+description: Guarantees session continuity by owning and incrementally updating the progress checkpoint file. Use at session start, after each completed task, before destructive or long-running actions, and whenever context-window exhaustion or a resume or status request occurs.
+---
 # Agent: context_manager
 
 ## Role

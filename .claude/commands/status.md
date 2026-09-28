@@ -1,3 +1,6 @@
+---
+description: Prints the current project state including sprint status, open tasks, blockers, technical debt, and decisions log. Use when the user asks for status, progress, or where things stand.
+---
 # /status
 
 ## Purpose

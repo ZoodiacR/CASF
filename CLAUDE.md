@@ -61,8 +61,8 @@ This chapter defines the collective persona that governs all agent behavior with
 - "That's not my area — let someone else figure it out."
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for the coordination layer
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural decision authority
+- See [project_orchestrator.md](agents/project_orchestrator.md) for the coordination layer
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural decision authority
 
 ---
 
@@ -93,8 +93,8 @@ These principles are the foundational values that guide all decision-making with
 - Adding complexity "for future flexibility" without current requirements
 
 ### References
-- See [security_officer.md](.claude/agents/security_officer.md) for security implementation
-- See [qa_engineer.md](.claude/agents/qa_engineer.md) for testing strategy
+- See [security_officer.md](agents/security_officer.md) for security implementation
+- See [qa_engineer.md](agents/qa_engineer.md) for testing strategy
 
 ---
 
@@ -113,7 +113,7 @@ This chapter defines how agents communicate with each other, with the user, and 
 
 ### Examples
 **Good:**
-- "I'm delegating API design to backend_architect. See handoff protocol in .claude/agents/backend_architect.md"
+- "I'm delegating API design to backend_architect. See handoff protocol in agents/backend_architect.md"
 - "Recording architectural decision in ADR-001: Use PostgreSQL for primary data store"
 
 **Bad:**
@@ -122,7 +122,7 @@ This chapter defines how agents communicate with each other, with the user, and 
 - Silent failures or assumptions about other agents' work
 
 ### References
-- See [project_orchestrator.md](.claude/agents/project_orchestrator.md) for handoff coordination
+- See [project_orchestrator.md](agents/project_orchestrator.md) for handoff coordination
 - See [templates/adr.md](.claude/templates/adr.md) for decision documentation format
 
 ---
@@ -260,7 +260,7 @@ This chapter defines how decisions are made, documented, and enforced within the
 - Ignoring dissenting opinions from specialist agents
 
 ### References
-- See [chief_engineer.md](.claude/agents/chief_engineer.md) for architectural authority
+- See [chief_engineer.md](agents/chief_engineer.md) for architectural authority
 - See [templates/adr.md](.claude/templates/adr.md) for ADR format
 
 ---
@@ -301,8 +301,8 @@ This chapter defines the high-level architectural principles that all systems mu
 - Synchronous calls to external services without timeout handling
 
 ### References
-- See [backend_architect.md](.claude/agents/backend_architect.md) for backend architecture
-- See [frontend_architect.md](.claude/agents/frontend_architect.md) for frontend architecture
+- See [backend_architect.md](agents/backend_architect.md) for backend architecture
+- See [frontend_architect.md](agents/frontend_architect.md) for frontend architecture
 
 ---
 
@@ -345,7 +345,7 @@ This chapter defines the delegation matrix — which agent delegates to whom, wh
 
 5. **No Circular Delegation:** Agent A may delegate to B, but B must not delegate back to A for the same task. Escalate to project_orchestrator instead.
 
-6. **Materialize agents as subagents (mandatory when the harness supports it):** The agents defined in `.claude/agents/*.md` are **roles**, not just prose. When the orchestrator runs on a harness that provides real subagent/task spawning (Cursor `Task` subagents, Claude Code subagents), it MUST **materialize** each role as a real subagent instead of enacting it inline, whenever the task is (a) independent/parallelizable, (b) an adversarial review that needs a distinct "brain", or (c) a large code-read that shouldn't pollute the main context. The `.md` is the **single portable source of truth**; each harness contributes only a thin adapter (native subagent in Claude Code, role→built-in-type mapping in Cursor). Mapping, prompt format, and guardrails (cost, triviality, "the reviewer is never the author") live in [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md). A review done inline by the author is NOT a review.
+6. **Materialize agents as subagents (mandatory when the harness supports it):** The agents defined in `agents/*.md` are **roles**, not just prose. When the orchestrator runs on a harness that provides real subagent/task spawning (Cursor `Task` subagents, Claude Code subagents), it MUST **materialize** each role as a real subagent instead of enacting it inline, whenever the task is (a) independent/parallelizable, (b) an adversarial review that needs a distinct "brain", or (c) a large code-read that shouldn't pollute the main context. The `.md` is the **single portable source of truth**; each harness contributes only a thin adapter (native subagent in Claude Code, role→built-in-type mapping in Cursor). Mapping, prompt format, and guardrails (cost, triviality, "the reviewer is never the author") live in [DELEGATION_BRIDGE.md](.claude/DELEGATION_BRIDGE.md). A review done inline by the author is NOT a review.
 
 ### Examples
 **Good:**
@@ -405,8 +405,8 @@ This chapter defines the quality loop that runs **after implementation**. It pre
 
 ### References
 - [workflows/slice_review_workflow.md](.claude/workflows/slice_review_workflow.md) — slices + adversarial review + wildcard slice
-- [agents/architecture_reviewer.md](.claude/agents/architecture_reviewer.md) — the evidence-mode reviewer
-- [agents/spec_quality_reviewer.md](.claude/agents/spec_quality_reviewer.md) — the spec quality gate
+- [agents/architecture_reviewer.md](agents/architecture_reviewer.md) — the evidence-mode reviewer
+- [agents/spec_quality_reviewer.md](agents/spec_quality_reviewer.md) — the spec quality gate
 - [templates/spec_quality_rubric.md](.claude/templates/spec_quality_rubric.md) — the 12-dimension scoring rubric
 - `.claude/examples/PROJECT_SPEC.md` — the benchmark rich spec (quality bar)
 

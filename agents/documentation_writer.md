@@ -1,3 +1,7 @@
+---
+name: documentation-writer
+description: Keeps README, ADRs, API docs, changelogs and runbooks synchronized with the code. Use when a feature or release needs documentation updates, an API or architectural decision changes, or a merge requires docs review and synchronization.
+---
 # Agent: documentation_writer
 
 ## Role

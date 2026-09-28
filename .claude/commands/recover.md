@@ -1,3 +1,6 @@
+---
+description: Runs emergency recovery for a production incident by triaging severity, containing the damage, executing rollback if needed, and writing a post-mortem. Use when a SEV1 or SEV2 incident occurs.
+---
 # /recover
 
 ## Purpose

@@ -1,3 +1,7 @@
+---
+name: qa-engineer
+description: Owns test strategy, unit, integration and e2e suites, coverage gates and regression testing. Use when a feature needs a test plan, coverage gates fail, flaky tests appear, or e2e journeys, test environments and test data need design.
+---
 # Agent: qa_engineer
 
 ## Role

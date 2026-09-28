@@ -1,3 +1,6 @@
+---
+description: Executes the release workflow from green main to production, running quality gates, updating the changelog, tagging, and deploying with rollback safety. Use when the user asks to ship, release, or deploy.
+---
 # /ship
 
 ## Purpose
