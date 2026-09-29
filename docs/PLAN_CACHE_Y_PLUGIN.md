@@ -283,7 +283,7 @@ Distinción honesta de dos significados:
 | Nivel | Qué requiere | Resultado |
 | --- | --- | --- |
 | **Plugin instalable** | Manifest + estructura + verificación | Cualquiera lo instala con `/plugin marketplace add ZoodiacR/CASF` |
-| **Marketplace oficial de Anthropic** | Envío a `anthropics/claude-plugins-community` y **pasar su revisión** | Aparece en el catálogo curado |
+| **Directorio de Anthropic** | Envío desde el portal `claude.ai/directory/manage` + **plan de pago de claude.ai** | Aparece en el catálogo de claude.ai/Cowork y llega a Claude Code por sincronización de cuenta |
 
 Alcanzamos el primero con certeza. El segundo depende de la revisión de Anthropic y lo preparamos
 (estructura, licencia, CHANGELOG, semver) para maximizar las probabilidades.
@@ -366,4 +366,5 @@ Alcanzamos el primero con certeza. El segundo depende de la revisión de Anthrop
   otro cwd y sin instalación global → Skills (8), Agents (14). Es lo que hace que el framework sea
   autocontenido: quien clone el repo no necesita instalar el plugin a mano.
 - **Publicación en el marketplace curado** de Anthropic: el plugin ya es instalable desde GitHub; para
-  el catálogo oficial hay que enviarlo a `anthropics/claude-plugins-community` y pasar su revisión.
+  el directorio de Anthropic hay que enviarlo desde el portal `claude.ai/directory/manage` (requiere plan
+  de pago de claude.ai). Nota: `claude-plugins-official` **no** acepta envíos por ese portal.

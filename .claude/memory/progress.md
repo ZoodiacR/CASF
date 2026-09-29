@@ -88,7 +88,7 @@
 
 ## ⏭️ Next actions (in order)
 1. **Validar el hit rate de caché con una corrida real** ⭐ — correr un build real desde CASF Studio y mirar la línea `↳ usage: … caché X% …` del log en vivo y la tarjeta "Aciertos de caché" del Dashboard. Si sale **0%**, la hipótesis a probar es **prefijo inestable** (contenido dinámico inyectado por el harness), **no** el PID. Ver `docs/PLAN_CACHE_Y_PLUGIN.md` Fase 4.
-2. **Publicar el plugin en el marketplace comunitario** ⭐ — enviarlo a `anthropics/claude-plugins-community` para su revisión (la instalación desde GitHub ya funciona hoy). Requiere CHANGELOG y semver al día, y **bump de `version` en `plugin.json` en cada release** (el version es la cache key del plugin: sin bump, los usuarios no reciben cambios).
+2. **Publicar en el directorio de Anthropic** ⭐ — el plugin **ya está publicado** por la vía del marketplace propio (repo público + `.claude-plugin/marketplace.json`; ciclo completo verificado desde GitHub). Para el catálogo que se navega en claude.ai/Cowork hay que **enviarlo desde el portal `claude.ai/directory/manage`**, que exige **plan de pago de claude.ai** (en Pro/Max desde la propia cuenta; en Team/Enterprise lo envía un Owner). Ojo: el marketplace oficial `claude-plugins-official` **no** acepta envíos por ese portal, y **agentes y comandos son solo de Claude Code** (no cargan en claude.ai/Cowork), así que hay que revisar la tabla de compatibilidad de componentes antes de enviar. Requiere CHANGELOG y semver al día, y **bump de `version` en `plugin.json` en cada release** (el version es la cache key del plugin: sin bump, los usuarios no reciben cambios).
 3. **Reportar el bug del campo `agents`** a `anthropics/claude-code`, con la reproducción mínima de los dos plugins de prueba (`validate` da verde pero el runtime carga 0 agentes).
 4. **Etapa 2.4 — Componentes premium anti-IA** (empty states ilustrados con icono+CTA, estados de error/éxito bonitos, tablas con sticky header)
 5. **Etapa 2.5 — Responsive + accesibilidad** (WCAG AA, focus visible, targets ≥44px, verificación móvil/tablet/desktop)
@@ -148,5 +148,5 @@ Hallazgo del usuario: *«los agents van afuera y simplemente usa los comandos pa
 2. **Probar el flujo completo** con los subagentes materializándose de verdad, y verificar en el log en vivo que dice «plugin CASF cargado».
 3. **Observar la próxima factura**: si el consumo se mantiene en `deepseek-flash` (y no `deepseek-v4-pro`), el arreglo de tiers quedó confirmado en producción.
 5. **Reportar a Anthropic**: el campo `agents` del manifest se valida pero no se carga; y el override silencioso de `settings.json` sobre el entorno del proceso.
-6. **Enviar al marketplace curado** `anthropics/claude-plugins-community` (el plugin ya es instalable desde GitHub).
+6. **Enviar al directorio de Anthropic** desde el portal `claude.ai/directory/manage` (requiere plan de pago de claude.ai). El plugin ya es instalable desde GitHub hoy.
 
