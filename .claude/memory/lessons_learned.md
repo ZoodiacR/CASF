@@ -198,4 +198,14 @@ Each lesson entry should include:
 
 ---
 
+### LL-027: Un contador que no se reporta no es un cobro que no se aplica — y mirar la factura cerró el bug
+
+- **Date:** 2026-09-28
+- **Lesson:** LL-025 dejó el cache miss de Claude Code como **hallazgo abierto** («la causa raíz no se pudo aislar»). Estaba mal planteado como problema de *caché*: era un problema de **reporte**. El panel de facturación de DeepSeek **no expone** columnas de cache hit/miss (cero menciones de «cache» en su DOM; tampoco en los docs de *Token & Usage*), pero la **aritmética sí decide**. Con las tarifas oficiales: los 537 M tokens de `deepseek-v4-pro` facturados a *cache miss* ($0.66/M) darían **$354**, **once veces** la factura total de **$31.71**; incluso a precio de *output* ($1.98/M) serían $1063. La única lectura compatible con la factura es que **el 91 %+ de esos tokens se cobraron como cache hit** ($0.022/M → $11.81). Es decir: `cache_read_input_tokens: 0` es lo que DeepSeek **devuelve al cliente**, no lo que **cobra**. Se abandonó la línea de investigación «socket/HTTP2» por innecesaria.
+- **Category:** Process
+- **Context:** Verificación pedida explícitamente por el usuario («revisa el panel de facturación»). El mismo recorrido destapó un hallazgo de coste mayor que el bug original.
+- **Action:** (1) Cuando un contador no cuadra, **preguntar primero si es de reporte o de cobro** — son bugs distintos con arreglos distintos, y el segundo te lo responde la factura, no el log. (2) **La aritmética de coste es una fuente de verdad de primera clase**: dos tarifas conocidas y un total bastan para refutar «no se aplica el descuento». (3) **Leer la documentación oficial del proveedor ANTES de investigar el protocolo**: la guía de integración de DeepSeek con Claude Code documentaba la causa del gasto desde el principio. (4) **Cuidado con las trampas de facturación silenciosas**: DeepSeek mapea `claude-opus*` → `deepseek-v4-pro` (4.4× más caro que Flash) y no avisa; hay que fijar `ANTHROPIC_DEFAULT_OPUS_MODEL`/`_SONNET_MODEL`/`_HAIKU_MODEL` y `CLAUDE_CODE_SUBAGENT_MODEL` o parte del tráfico se cobra a precio Pro en silencio. (5) Un sufijo de capacidad (`[1m]`) puede cambiar el contexto real: verificar `contextWindow` en la respuesta, no asumirlo. (6) Antes de cambiar un **nombre de modelo** que alimenta un ledger, comprobar que el resolver de precios sigue casando (aquí: fallback por prefijo `deepseek*`).
+
+---
+
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

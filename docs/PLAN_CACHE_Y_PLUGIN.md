@@ -318,16 +318,45 @@ Alcanzamos el primero con certeza. El segundo depende de la revisión de Anthrop
 
 ### Hallazgos abiertos
 
-- **Causa raíz del cache miss en la ruta Claude Code → DeepSeek.** Aislada pero no identificada:
-  cuerpo/headers/ruta idénticos aciertan cuando los enviamos nosotros y fallan cuando los envía el CLI.
-  **Descartado con evidencia:** prefijo inestable, protocolo, ruta con `?beta=true`, header
-  `anthropic-beta` completo, credencial (`Bearer` vs `x-api-key`), user-agent, session-id, latencia de
-  calentamiento y streaming. Queda **una vía directa** y **una de bypass**:
-  - **Directa:** comparar la petición a nivel de socket (HTTP/1.1 vs HTTP/2, chunked vs
-    `content-length`, orden de headers, compresión del cuerpo) o —más barato— mirar el **panel de
-    facturación de DeepSeek**: si ahí aparecen aciertos, el caché **sí** se aplica y solo **no se
-    reporta** por esa ruta, lo que cierra el bug como artefacto de reporte.
-  - **Bypass:** usar la API nativa para la generación masiva (98.9 % medido). Ver §2b.3.
+- **RESUELTO (2026-09-28, tarde) — el cache miss era un ARTEFACTO DE REPORTE, no de cobro.**
+  El panel de facturación de DeepSeek **no expone columnas de cache hit/miss** (se comprobó: cero
+  menciones de «cache» en su DOM y tampoco en sus docs de *Token & Usage*). Pero la aritmética del
+  panel lo cierra igual, y de forma concluyente:
+
+  | Dato del panel (últimos 30 días) | Valor |
+  |---|---|
+  | Coste total | **$31.71** |
+  | Tokens `deepseek-v4-pro` | **537,003,171** |
+  | Tokens `deepseek-flash` | 66,637,695 |
+
+  La tarifa **cache miss** de `deepseek-v4-pro` es **$0.66/M**. Facturar esos 537 M tokens a miss
+  daría **$354 — once veces la factura entera de $31.71**. Incluso asumiendo que todo fueran *output*
+  ($1.98/M) serían $1063. La única lectura compatible con la factura es que el **91 %+ de esos tokens
+  se cobraron como cache hit** ($0.022/M → $11.81). **El descuento de caché se está aplicando.**
+
+  Confirmación independiente obtenida mientras se medía: entre dos lecturas del panel separadas por
+  ~1 h, las **35 peticiones nuevas fueron 100 % a `deepseek-flash`** (`deepseek-v4-pro` no se movió ni
+  una petición). Es decir, con la config corregida el tráfico nuevo aterriza en el modelo barato.
+
+  **Conclusión:** `cache_read_input_tokens: 0` es lo que DeepSeek **reporta** al cliente por esta ruta,
+  no lo que **cobra**. El bug se cierra como artefacto de reporte. Se abandona la vía «socket/HTTP2»
+  por innecesaria.
+
+- **Hallazgo de coste (el más accionable): la config del provider estaba incompleta.** La guía
+  **oficial** de DeepSeek para Claude Code
+  (`api-docs.deepseek.com/quick_start/agent_integrations/claude_code`) documenta variables que el
+  provider **no** fijaba, y una de ellas es una trampa de facturación:
+  - DeepSeek **mapea los tiers de Claude a modelos suyos**: `claude-opus*` → `deepseek-v4-pro`
+    (facturado a precio Pro: **4.4× Flash en miss, 7.3× en hit**); `claude-sonnet*`/`claude-haiku*` →
+    `deepseek-flash`. Dejar `ANTHROPIC_DEFAULT_OPUS_MODEL` sin fijar significa que cualquier petición
+    que resuelva al tier opus (subagentes, rutas internas del CLI) se cobra a precio Pro **en silencio**.
+  - El sufijo **`[1m]`** es lo que habilita el contexto de **1M**. Verificado: `deepseek-flash[1m]`
+    reporta `contextWindow: 1000000` (sin sufijo, 200 000).
+  - `CLAUDE_CODE_SUBAGENT_MODEL`, `CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432`, `CLAUDE_CODE_EFFORT_LEVEL=max`.
+
+  **Arreglado** en `claudeCodeProvider.ts`: se fijan los cuatro puntos (principal, opus, sonnet,
+  haiku) más el modelo de subagentes. El ledger no se rompe: `resolveModel()` no encuentra
+  `deepseek-flash[1m]` exacto y cae al fallback por prefijo `deepseek*` → `deepseek-flash`.
 - **Reportar a Anthropic:**
   - El campo `agents` del manifest se valida pero el loader no lo honra (reproducción mínima: dos
     plugins idénticos salvo la ubicación de los agentes).

@@ -161,4 +161,14 @@ Each decision entry should include:
 
 ---
 
+### 2026-09-28: El cache miss era artefacto de reporte — y la config del provider le faltaba los tiers de DeepSeek
+
+- **Decision:** (1) **Cerrar** el hallazgo del cache miss como **artefacto de reporte**, no como bug de cobro: se abandona la investigación «socket/HTTP2». (2) **Adoptar la configuración oficial** de DeepSeek para Claude Code en `claudeCodeProvider.ts`, fijando los cuatro tiers de modelo más el de subagentes, y usar `deepseek-flash[1m]` para habilitar 1M de contexto.
+- **Category:** Architecture
+- **Rationale:** El panel de facturación **no** tiene columnas de caché, pero la aritmética con las tarifas oficiales cierra el caso: los 537 M tokens de `deepseek-v4-pro` a precio *miss* ($0.66/M) darían **$354**, once veces la factura de **$31.71**; a precio *output* ($1.98/M) serían $1063. La única lectura compatible es que **el 91 %+ se cobró como cache hit** ($0.022/M → $11.81). Por tanto `cache_read_input_tokens: 0` es lo que DeepSeek **reporta** al cliente, no lo que **cobra**.
+  Y al verificar la factura apareció algo más caro que el bug: la guía **oficial** de DeepSeek para Claude Code documenta un **mapeo de tiers** que el provider no fijaba — `claude-opus*` → `deepseek-v4-pro`, facturado a **4.4×** el precio de Flash (7.3× en cache hit). Sin `ANTHROPIC_DEFAULT_OPUS_MODEL`, cualquier petición que resuelva al tier opus (subagentes, rutas internas del CLI) se cobra a precio Pro **sin aviso**. Además, el sufijo `[1m]` es lo que habilita **1M** de contexto: verificado `contextWindow: 1000000` (sin sufijo, 200 000). Medición independiente del arreglo: en ~1 h, las **35 peticiones nuevas fueron 100 % a `deepseek-flash`**, con `deepseek-v4-pro` sin moverse.
+- **Impact:** `casf-studio/backend/src/claudeCodeProvider.ts` (`settingsJson` con `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`, `CLAUDE_CODE_SUBAGENT_MODEL`, `CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432`, `CLAUDE_CODE_EFFORT_LEVEL=max`, `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 200k → 1M, y `deepseek-flash[1m]`; todo con escape hatch por env). El ledger no se rompe: `resolveModel()` no casa `deepseek-flash[1m]` exacto y cae al fallback por prefijo `deepseek*` → `deepseek-flash`. Documentado en `docs/PLAN_CACHE_Y_PLUGIN.md` (§2b) y `.claude/memory/lessons_learned.md` (LL-027). Verificado: 18/18 tests, `tsc --noEmit` limpio, y la línea de comandos exacta del provider devuelve `model=deepseek-flash[1m]`, `contextWindow=1000000` y 22 entradas `casf:`.
+
+---
+
 <!-- CASF v1.0 · generated 2026-08-06T22:51:00Z -->

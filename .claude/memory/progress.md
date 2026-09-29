@@ -121,9 +121,10 @@
 - El caché **sí funciona**: API nativa de DeepSeek **98.9 %**, shim `/anthropic` **99.5 %**, disponible a los **+3 s**.
 - Se descartaron **todas** las variables de transporte (query `?beta=true`, header `anthropic-beta` completo de 8 valores, `Bearer` vs `x-api-key`, user-agent, session-id): todas 99.5 %.
 - El **mismo cuerpo byte a byte** reenviado por nosotros → **99.5 %**; enviado por Claude Code → **0 %**, y el upstream confirma que devolvió 0. **Causa raíz no aislada → hallazgo abierto**, no conclusión.
-- **Bugs confirmados:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). **Arreglado** con `--settings`, que sí tiene precedencia y además merge.
-- **Retirado:** el «bucle de reintentos» NO era de Claude Code: solo aparecía al enrutar por mi proxy instrumentado. Directo, 8+ corridas sin un reintento.
-- **Hipótesis refutada:** el caché NO está namespaceado por credencial. Bearer cachea igual (98.5%) y el caché se comparte entre `Bearer` y `x-api-key`. (Mi prueba anterior de Bearer era inválida: reenviaba la variable equivocada.)
+- **Bug confirmado:** `~/.claude/settings.json` pisa el entorno del proceso hijo (forzaba el modelo legacy `deepseek-chat` y 64k de contexto en vez de 200k). **Arreglado** con `--settings`, que sí tiene precedencia y además merge.
+- **CERRADO — el cache miss era artefacto de REPORTE, no de cobro.** El panel no tiene columnas de caché, pero la aritmética lo decide: los 537 M tokens de `deepseek-v4-pro` a precio *cache miss* ($0.66/M) darían **$354**, once veces la factura de **$31.71**. La única lectura compatible es que el 91 %+ se cobró como *cache hit* ($11.81). **El descuento de caché se aplica**; `cache_read_input_tokens: 0` es lo que DeepSeek reporta a esta ruta, no lo que cobra.
+- **Hallazgo de coste (accionable): la config del provider estaba incompleta.** La guía OFICIAL de DeepSeek para Claude Code exige fijar los tiers: `claude-opus*` se mapea a `deepseek-v4-pro` (4.4× más caro que Flash). Sin `ANTHROPIC_DEFAULT_OPUS_MODEL`, los subagentes/rutas internas se cobran a precio Pro en silencio. Además, el sufijo `[1m]` habilita **1M de contexto** (verificado: `contextWindow: 1000000`). **Arreglado** en `claudeCodeProvider.ts`.
+- **Hipótesis refutada:** el caché NO está namespaceado por credencial. Bearer cachea igual (98.5%) y el caché se comparte entre `Bearer` y `x-api-key`. (Mi prueba anterior de Bearer era inválida: reenviaba la variable equivocada.) También refutadas: el modelo legacy bloqueando caché (3+3 corridas, 0) y el streaming bloqueando caché (98.5 % igual).
 - **Decisión derivada:** arquitectura híbrida — Claude Code para el trabajo agéntico, API nativa de DeepSeek para la generación masiva con prefijo estático grande (~33× de ahorro medido en el input).
 
 ## ✅ Materialización de subagentes (2026-09-28)
@@ -143,10 +144,9 @@ Hallazgo del usuario: *«los agents van afuera y simplemente usa los comandos pa
 - `casf-studio/backend/src/claudeCodeProvider.ts` (`--plugin-dir`)
 
 ## 🎯 Próximos pasos
-1. **`CLAUDE_CONFIG_DIR` propio** en `claudeCodeProvider.ts` para que el `settings.json` del usuario no pise el entorno (hoy fuerza el modelo legacy `deepseek-chat` y 64k de contexto).
-2. **Acotar `maxRetries`/timeout** en el provider (hoy puede quedarse en bucle quemando cuota).
-3. **Capa directa a la API nativa de DeepSeek** para la generación masiva (captura el caché medido, ~33×).
-4. **Probar el flujo completo** con los subagentes materializándose de verdad, y verificar en el log en vivo que dice «plugin CASF cargado».
+1. **Capa directa a la API nativa de DeepSeek** para la generación masiva (captura el caché medido, ~33×). *(Ya no urgente: se confirmó que el caché sí se cobra barato por la ruta Claude Code.)*
+2. **Probar el flujo completo** con los subagentes materializándose de verdad, y verificar en el log en vivo que dice «plugin CASF cargado».
+3. **Observar la próxima factura**: si el consumo se mantiene en `deepseek-flash` (y no `deepseek-v4-pro`), el arreglo de tiers quedó confirmado en producción.
 5. **Reportar a Anthropic**: el campo `agents` del manifest se valida pero no se carga; y el override silencioso de `settings.json` sobre el entorno del proceso.
 6. **Enviar al marketplace curado** `anthropics/claude-plugins-community` (el plugin ya es instalable desde GitHub).
 
