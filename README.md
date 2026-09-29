@@ -12,15 +12,16 @@
 4. [Architecture](#-architecture)
 5. [Project Structure](#-project-structure)
 6. [Installation & Setup](#-installation--setup)
-7. [The 14 Agents](#-the-14-agents)
-8. [Slash Commands](#-slash-commands)
-9. [Workflows](#-workflows)
-10. [How to Use It](#-how-to-use-it)
-11. [Prompt Library](#-prompt-library)
-12. [Best Practices](#-best-practices)
-13. [FAQ](#-faq)
-14. [Roadmap](#-roadmap)
-15. [License](#-license)
+7. [Publishing & Releases](#-publishing--releases)
+8. [The 14 Agents](#-the-14-agents)
+9. [Slash Commands](#-slash-commands)
+10. [Workflows](#-workflows)
+11. [How to Use It](#-how-to-use-it)
+12. [Prompt Library](#-prompt-library)
+13. [Best Practices](#-best-practices)
+14. [FAQ](#-faq)
+15. [Roadmap](#-roadmap)
+16. [License](#-license)
 
 ---
 
@@ -263,6 +264,74 @@ headless Claude Code sessions with the repo as the working directory.
 - Write `project_spec.md` yourself using [`.claude/templates/spec_template.md`](.claude/templates/spec_template.md).
 
 Then let the orchestrator build it in slices, with the adversarial review loop. 🚀
+
+---
+
+## 📦 Publishing & Releases
+
+CASF is **its own marketplace**: `.claude-plugin/plugin.json` is the plugin manifest and
+`.claude-plugin/marketplace.json` is the catalog, with a single entry whose `source` is `"./"` —
+the repository root. That is the pattern the docs prescribe for publishing from the plugin's own
+repository, and per [Publish and distribute a plugin](https://code.claude.com/docs/en/plugins/publish.md):
+*"Once the file is in the repository, the plugin is published, with no submission form."*
+
+So **there is nothing to submit**: the plugin became installable the moment the repository went
+public. Reach is the only thing left to decide (see *Reach a wider audience* below).
+
+### One-line install (Claude Code v2.1.275+)
+
+```
+/plugin install casf --marketplace ZoodiacR/CASF
+```
+
+### Pre-release checklist
+
+Run both before every release, and in CI:
+
+```bash
+claude plugin validate --strict .   # --strict also fails on warnings
+claude plugin details casf          # expect: Skills (8) · Agents (14)
+```
+
+| Check | Why it matters |
+|---|---|
+| **`version` bumped** in `plugin.json` | It is the plugin's **cache key**. Push commits without bumping it and `claude plugin update` answers *"is already at the latest version"* — users keep the old copy |
+| **`name` unchanged** | A renamed plugin is a *different* plugin to every existing install (`Plugin "…" not found in marketplace`). Set `displayName` for the label instead |
+| `description` / `author` / `homepage` / `repository` set | What users see in `/plugin` and on the marketplace. `homepage` must parse as a URL |
+| `validate --strict` clean | Unknown manifest fields and a missing `version` are warnings here and failures at the submission portal |
+
+> **Instead of bumping `version`,** you can omit it: Claude Code then versions the plugin by commit
+> SHA. Pick one and stay consistent.
+
+### Tag a release
+
+Tags are only needed when another plugin declares a version range on CASF. `claude plugin tag`
+validates that `plugin.json` and the enclosing marketplace entry agree on the version.
+
+```bash
+claude plugin tag --push        # creates the casf--v1.0.0 git tag
+```
+
+### Reach a wider audience
+
+| Route | Who can install | What it takes |
+|---|---|---|
+| **This marketplace** — current | Anyone who can reach this repo | Nothing. Already live |
+| **[Anthropic's directory](https://code.claude.com/docs/en/plugins/publish.md)** | People browsing claude.ai and Cowork | A **paid claude.ai plan**, submitting from [claude.ai/directory/manage](https://claude.ai/directory/manage) |
+
+> Two caveats before submitting there: `claude-plugins-official` does **not** accept submissions
+> through that portal, and **agents and commands are Claude Code-only** — they do not load on
+> claude.ai or in Cowork. What travels through the directory from CASF are the **skills**.
+
+### How users get updates
+
+The install id is `casf@casf` — that is `plugin@marketplace`. Users pull new versions with:
+
+```bash
+claude plugin update casf@casf
+```
+
+Auto-update is **off by default** for a third-party marketplace; each user turns it on for theirs.
 
 ---
 
