@@ -17,7 +17,26 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # Secret scanning: fails the run if a push/PR introduces credentials.
+  # On push/PR, gitleaks-action scans only the new commits (not old history).
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout (full history for commit-range scan)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
   build-and-publish:
+    needs: secret-scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
